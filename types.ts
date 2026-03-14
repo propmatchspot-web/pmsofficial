@@ -39,6 +39,7 @@ export interface PropFirm {
   paymentMethods?: string[];
   challenges?: Challenge[];
   status?: 'active' | 'draft' | 'inactive';
+  show_in_hero?: boolean; // Added for Hero showcase toggle feature
   // Trading Specs
   leverage?: string;
   newsTrading?: boolean;

@@ -27,12 +27,21 @@ const LandingPage: React.FC = () => {
   const [topFirms, setTopFirms] = useState<PropFirm[]>([]);
   const [activeFirm, setActiveFirm] = useState(0);
 
-  // Showcase firms for the hero widget
-  const showcaseFirms = [
-    { name: 'FTMO', rating: 4.9, profit: '90%', maxFunding: '$400K', drawdown: '10%', logo: 'https://www.google.com/s2/favicons?domain=ftmo.com&sz=128', tag: 'Most Popular' },
-    { name: 'Funding Pips', rating: 4.8, profit: '90%', maxFunding: '$300K', drawdown: '8%', logo: 'https://www.google.com/s2/favicons?domain=fundingpips.com&sz=128', tag: 'Best Rules' },
-    { name: 'The5ers', rating: 4.7, profit: '80%', maxFunding: '$250K', drawdown: '6%', logo: 'https://www.google.com/s2/favicons?domain=the5ers.com&sz=128', tag: 'Instant Funding' },
-  ];
+  // Dynamically derive showcase firms from topFirms (first 3)
+  const showcaseFirms = topFirms.length > 0 
+    ? topFirms.slice(0, 3).map((firm, i) => ({
+        name: firm.name,
+        rating: firm.rating,
+        profit: firm.profitSplit || '80%',
+        maxFunding: firm.maxFunding ? `$${firm.maxFunding / 1000}K` : '$100K',
+        drawdown: firm.drawdown || '8%',
+        logo: firm.logo,
+        tag: firm.show_in_hero ? 'Featured' : i === 0 ? 'Top Choice' : i === 1 ? 'Highly Rated' : 'Popular',
+        id: firm.id
+      }))
+    : [
+        { name: 'Loading...', rating: 5.0, profit: '--', maxFunding: '--', drawdown: '--', logo: '', tag: 'Featured', id: 'loading' }
+      ];
 
   // Live payout feed data
   const payoutFeed = [
@@ -63,11 +72,12 @@ const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const len = showcaseFirms.length;
     const interval = setInterval(() => {
-      setActiveFirm((prev) => (prev + 1) % showcaseFirms.length);
+      setActiveFirm((prev) => (prev + 1) % len);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [topFirms.length]);
 
   const fetchTopFirms = async () => {
     try {
