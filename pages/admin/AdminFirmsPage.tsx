@@ -575,6 +575,18 @@ const AdminFirmsPage: React.FC = () => {
                           placeholder="e.g. Yes (every 3 months) - scale up 25%"
                         />
                       </div>
+
+                      {/* Feature in Hero Section Toggle */}
+                      <div className="bg-brand-gold/5 p-4 rounded-lg border border-brand-gold/30 mt-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-white text-sm">Feature in Hero Section</p>
+                          <p className="text-xs text-brand-muted mt-0.5">Force this firm to display prominently in the top spotlight.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" name="show_in_hero" defaultChecked={selectedFirm?.show_in_hero} className="sr-only peer" />
+                          <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
