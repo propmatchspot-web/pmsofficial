@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import {
     LayoutDashboard,
     Building2,
@@ -13,9 +13,7 @@ import {
     Search,
     Bell,
     CreditCard,
-    Shield,
-    Trophy,
-    Send
+    Shield
 } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
@@ -32,8 +30,6 @@ const AdminLayout: React.FC = () => {
                 { icon: MessageSquare, label: 'Reviews', path: '/admin/reviews', badge: '12', badgeColor: 'bg-surface-highlight text-white/60 border border-border-dark' },
                 { icon: CreditCard, label: 'Payouts', path: '/admin/payouts' }, // Placeholder route
                 { icon: Shield, label: 'Trust Badges', path: '/admin/badges' }, // Placeholder route
-                { icon: Trophy, label: 'Competitions', path: '/admin/competitions' },
-                { icon: Send, label: 'Marketing', path: '/admin/marketing' },
                 { icon: Tag, label: 'Offers', path: '/admin/offers' }, // Added to keep existing functionality
             ]
         },
@@ -62,8 +58,8 @@ const AdminLayout: React.FC = () => {
 
                 <nav className="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-1">
                     <Link to="/admin" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border grouptransition-colors ${location.pathname === '/admin'
-                        ? 'bg-primary/10 border-primary/20 text-primary'
-                        : 'border-transparent text-white/70 hover:bg-surface-highlight hover:text-white'
+                            ? 'bg-primary/10 border-primary/20 text-primary'
+                            : 'border-transparent text-white/70 hover:bg-surface-highlight hover:text-white'
                         }`}>
                         <span className="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
                         <span className="text-sm font-medium">Dashboard</span>
@@ -72,39 +68,22 @@ const AdminLayout: React.FC = () => {
                     {menuItems.slice(1).map((section, idx) => (
                         <div key={idx}>
                             <div className="pt-4 pb-2 px-3 text-xs font-bold text-white/40 uppercase tracking-wider">{section.section}</div>
-                            {section.items.map((item) => {
-                                // Apply the new NavLink styling only for the 'Settings' section items
-                                if (section.section === 'Settings') {
-                                    return (
-                                        <NavLink
-                                            key={item.path}
-                                            to={item.path}
-                                            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20' : 'text-brand-muted hover:text-white hover:bg-white/5'}`}
-                                        >
-                                            <item.icon size={20} />
-                                            {item.label}
-                                        </NavLink>
-                                    );
-                                } else {
-                                    // Keep existing Link styling for other sections
-                                    return (
-                                        <Link
-                                            key={item.path}
-                                            to={item.path}
-                                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-surface-highlight hover:text-white transition-all group ${location.pathname === item.path ? 'bg-surface-highlight text-white' : ''
-                                                }`}
-                                        >
-                                            <item.icon size={20} className="group-hover:text-primary transition-colors" />
-                                            <span className="text-sm font-medium">{item.label}</span>
-                                            {item.badge && (
-                                                <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeColor}`}>
-                                                    {item.badge}
-                                                </span>
-                                            )}
-                                        </Link>
-                                    );
-                                }
-                            })}
+                            {section.items.map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-surface-highlight hover:text-white transition-all group ${location.pathname === item.path ? 'bg-surface-highlight text-white' : ''
+                                        }`}
+                                >
+                                    <item.icon size={20} className="group-hover:text-primary transition-colors" />
+                                    <span className="text-sm font-medium">{item.label}</span>
+                                    {item.badge && (
+                                        <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeColor}`}>
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </Link>
+                            ))}
                         </div>
                     ))}
                 </nav>

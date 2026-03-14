@@ -357,71 +357,39 @@ const AchievementsTab = ({ stats }: { stats: any }) => {
 /* -----------------------------------------------------------------------------------------
    5. REWARDS TAB
 ----------------------------------------------------------------------------------------- */
-/* -----------------------------------------------------------------------------------------
-   5. REWARDS TAB
------------------------------------------------------------------------------------------ */
 const RewardsTab = ({ stats }: { stats: any }) => {
-  const [rewards, setRewards] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRewards = async () => {
-      const { data, error } = await supabase
-        .from('rewards')
-        .select('*')
-        .eq('status', 'active')
-        .order('cost', { ascending: true });
-
-      if (data) setRewards(data);
-      setLoading(false);
-    };
-    fetchRewards();
-  }, []);
+  // Mock rewards based on points/level
+  const rewards = [
+    { id: 1, title: 'Free Audit', cost: 0, desc: 'One-time free journal audit', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=200', available: true },
+    { id: 2, title: '10% Off Stitch AI', cost: 500, desc: 'Get pro features for less', image: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&q=80&w=200', available: (stats.points || 0) >= 500 },
+    { id: 3, title: 'Exclusive E-Book', cost: 1000, desc: 'Advanced Risk Management', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=200', available: (stats.points || 0) >= 1000 },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in-up">
       <h2 className="text-2xl font-bold text-white">Rewards Store</h2>
-
-      {loading ? (
-        <div className="text-brand-muted">Loading rewards...</div>
-      ) : rewards.length === 0 ? (
-        <div className="text-center py-12 bg-brand-surface border border-brand-border rounded-xl">
-          <Gift className="mx-auto h-12 w-12 text-brand-muted mb-4 opacity-50" />
-          <h3 className="text-white text-lg font-medium">No rewards available yet</h3>
-          <p className="text-brand-muted mt-2">Check back soon for exclusive items.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rewards.map((reward) => {
-            const isAvailable = (stats.points || 0) >= reward.cost;
-            return (
-              <div key={reward.id} className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden group hover:border-brand-gold/50 transition-colors">
-                <div className="h-32 bg-gray-800 relative">
-                  <img
-                    src={reward.image_url || 'https://placehold.co/600x400/1e1e1e/F6AE13?text=Reward'}
-                    alt={reward.title}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                  />
-                  <div className="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs font-bold text-white backdrop-blur-sm">
-                    {reward.cost === 0 ? 'FREE' : `${reward.cost} Pts`}
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-white text-lg">{reward.title}</h3>
-                  <p className="text-sm text-brand-muted mt-1 mb-4 min-h-[40px]">{reward.description}</p>
-                  <Button
-                    className={`w-full ${isAvailable ? 'bg-brand-gold text-black hover:bg-brand-goldHover' : 'bg-brand-charcoal text-neutral-500 cursor-not-allowed'}`}
-                    disabled={!isAvailable}
-                    onClick={() => alert(`Redeem logic coming soon! Code: ${reward.code || 'SECRET'}`)}
-                  >
-                    {isAvailable ? 'Redeem Reward' : `Need ${reward.cost - (stats.points || 0)} more pts`}
-                  </Button>
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rewards.map((reward) => (
+          <div key={reward.id} className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden group">
+            <div className="h-32 bg-gray-800 relative">
+              <img src={reward.image} alt={reward.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs font-bold text-white backdrop-blur-sm">
+                {reward.cost === 0 ? 'FREE' : `${reward.cost} Pts`}
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+            <div className="p-5">
+              <h3 className="font-bold text-white text-lg">{reward.title}</h3>
+              <p className="text-sm text-brand-muted mt-1 mb-4">{reward.desc}</p>
+              <Button
+                className={`w-full ${reward.available ? 'bg-brand-gold text-black' : 'bg-brand-charcoal text-neutral-500 cursor-not-allowed'}`}
+                disabled={!reward.available}
+              >
+                {reward.available ? 'Redeem Reward' : `Need ${reward.cost - (stats.points || 0)} more pts`}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

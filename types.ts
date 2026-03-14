@@ -16,11 +16,8 @@ export interface PropFirm {
   id: string;
   name: string;
   website?: string;
-  websiteUrl?: string;
   affiliateLink?: string;
-  discountCode?: string;
   logo: string;
-  favicon?: string | null;
   rating: number;
   reviewCount: number;
   trustScore: number;
@@ -39,17 +36,6 @@ export interface PropFirm {
   paymentMethods?: string[];
   challenges?: Challenge[];
   status?: 'active' | 'draft' | 'inactive';
-  // Trading Specs
-  leverage?: string;
-  newsTrading?: boolean;
-  weekendHolding?: boolean;
-  scalingPlan?: boolean;
-  scalingPlanDetails?: string;
-  // Payout Stats
-  avgPayoutTime?: string;
-  payoutPercentage?: number;
-  last30DaysPayouts?: string;
-  payoutGrowth?: string;
 }
 
 export interface Review {

@@ -1,8 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { useModal } from '../context/ModalContext';
 import { Loader2 } from 'lucide-react';
 
 interface Offer {
@@ -23,77 +20,30 @@ interface Offer {
 }
 
 const OffersPage: React.FC = () => {
-  const { user } = useAuth(); // Destructured user from useAuth
-  const { showModal } = useModal(); // Destructured showModal from useModal
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [verifying, setVerifying] = useState<string | null>(null); // Added verifying state
-  const [proofFile, setProofFile] = useState<File | null>(null); // Added proofFile state
 
   useEffect(() => {
-    fetchOffers(); // Changed to call fetchOffers directly
+    const fetchOffers = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('offers')
+          .select('*, firms(name, logo_url, website, affiliate_link)')
+          .eq('status', 'active')
+          .order('verified', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setOffers(data || []);
+      } catch (err) {
+        console.error('Error loading offers:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOffers();
   }, []);
-
-  // Modified fetchOffers to match the provided snippet
-  const fetchOffers = async () => {
-    setLoading(true); // Keep loading state consistent with original
-    try {
-      const { data, error } = await supabase
-        .from('offers')
-        .select('*, firms(name, logo_url, website, affiliate_link)') // Reverted select to original for full data
-        .eq('status', 'active')
-        .order('verified', { ascending: false })
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setOffers(data || []);
-    } catch (err) {
-      console.error('Error loading offers:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Added copyCode function
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    showModal({ type: 'success', title: 'Copied!', message: `Promo code ${code} copied to clipboard.` });
-  };
-
-  // Added handleVerify function
-  const handleVerify = async (offerId: string) => {
-    if (!user) {
-      showModal({ type: 'info', title: 'Login Required', message: 'Please log in to submit verification.' });
-      return;
-    }
-    if (!proofFile) {
-      showModal({ type: 'warning', title: 'Missing Proof', message: 'Please upload a screenshot of your purchase.' });
-      return;
-    }
-
-    const fileName = `${user.id}/${Date.now()}_proof.jpg`;
-    const { error: uploadError } = await supabase.storage.from('proofs').upload(fileName, proofFile);
-
-    if (uploadError) {
-      showModal({ type: 'error', title: 'Upload Failed', message: 'Failed to upload proof. Please try again.' });
-      return;
-    }
-
-    const { error: insertError } = await supabase.from('offer_verifications').insert({
-      user_id: user.id,
-      offer_id: offerId,
-      proof_url: fileName,
-      status: 'pending'
-    });
-
-    if (insertError) {
-      showModal({ type: 'error', title: 'Submission Failed', message: 'Failed to submit verification.' });
-    } else {
-      showModal({ type: 'success', title: 'Submitted', message: 'Verification request submitted! We will review it shortly.' });
-      setVerifying(null);
-      setProofFile(null);
-    }
-  };
 
   return (
     <div className="pt-24 pb-20 min-h-screen bg-brand-black">

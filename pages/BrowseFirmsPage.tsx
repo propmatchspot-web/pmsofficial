@@ -58,26 +58,12 @@ const BrowseFirmsPage: React.FC = () => {
   }, []);
 
   const filteredFirms = firms.filter(firm => {
-    // Search filter - matches name or tags
+    // If we have no tags, ensure searching by name still works
     const tagMatch = firm.tags ? firm.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) : false;
-    const matchesSearch = !searchTerm || firm.name.toLowerCase().includes(searchTerm.toLowerCase()) || tagMatch;
+    const matchesSearch = firm.name.toLowerCase().includes(searchTerm.toLowerCase()) || tagMatch;
 
-    // Rating filter
     const matchesRating = firm.rating >= minRating;
 
-    // Profit Split filter - parse the profit split string to get max value
-    const profitSplitStr = firm.profitSplit || '80';
-    // Extract numbers from strings like "80 - 90%" or "Up to 95%"
-    const profitNumbers = profitSplitStr.match(/\d+/g);
-    const maxProfitSplit = profitNumbers ? Math.max(...profitNumbers.map(Number)) : 80;
-    const matchesProfitSplit = maxProfitSplit >= profitSplit;
-
-    // Drawdown filter - parse the drawdown string to compare
-    const drawdownStr = firm.drawdown || '10%';
-    const drawdownNum = parseInt(drawdownStr.replace(/[^0-9]/g, '')) || 10;
-    const matchesDrawdown = drawdownNum <= maxDrawdown;
-
-    // Account Type filter
     let matchesType = true;
     if (selectedAccountType) {
       const typeMap: Record<string, string> = {
@@ -88,10 +74,10 @@ const BrowseFirmsPage: React.FC = () => {
       };
       const targetType = typeMap[selectedAccountType];
       // Check if ANY challenge matches the type
-      matchesType = firm.challenges ? firm.challenges.some(c => c.challengeType === targetType) : true;
+      matchesType = firm.challenges ? firm.challenges.some(c => c.challengeType === targetType) : false;
     }
 
-    return matchesSearch && matchesRating && matchesProfitSplit && matchesDrawdown && matchesType;
+    return matchesSearch && matchesRating && matchesType;
   });
 
   return (
@@ -145,8 +131,8 @@ const BrowseFirmsPage: React.FC = () => {
                         key={type}
                         onClick={() => setSelectedAccountType(selectedAccountType === type ? null : type)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${selectedAccountType === type
-                          ? 'bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_10px_rgba(246,174,19,0.3)]'
-                          : 'bg-brand-charcoal text-brand-muted border-brand-border hover:border-brand-gold/50 hover:text-white'
+                            ? 'bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_10px_rgba(246,174,19,0.3)]'
+                            : 'bg-brand-charcoal text-brand-muted border-brand-border hover:border-brand-gold/50 hover:text-white'
                           }`}
                       >
                         {type}

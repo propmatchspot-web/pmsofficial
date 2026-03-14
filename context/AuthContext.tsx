@@ -20,51 +20,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const initAuth = async () => {
-            try {
-                // 1. Get initial session
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) throw error;
-
-                setSession(session);
-                setUser(session?.user ?? null);
-
-                if (session?.user) {
-                    await checkAdminStatus(session.user);
-                }
-            } catch (error) {
-                console.error("Auth initialization error:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initAuth();
-
-        // 2. Listen for auth changes
-        // 2. Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            try {
-                setSession(session);
-                setUser(session?.user ?? null);
-                // Verify admin status on auth change (e.g. login)
-                if (session?.user) {
-                    await checkAdminStatus(session.user);
-                }
-            } catch (error) {
-                console.error("Auth change error:", error);
-            } finally {
-                setLoading(false);
-            }
+        // 1. Get initial session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+            checkAdminStatus(session?.user);
+            setLoading(false);
         });
 
-        // Failsafe: Force loading to false after 5 seconds if generic auth hangs
-        const timeoutId = setTimeout(() => setLoading(false), 5000);
+        // 2. Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+            checkAdminStatus(session?.user);
+            setLoading(false);
+        });
 
-        return () => {
-            subscription.unsubscribe();
-            clearTimeout(timeoutId);
-        };
+        return () => subscription.unsubscribe();
     }, []);
 
     const checkAdminStatus = async (user: User | null | undefined) => {
@@ -73,16 +45,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
-        // 1. PRIORITY: Hardcoded admin check (Bypasses DB for critical access)
-        const emailLower = user.email?.toLowerCase();
-        if (emailLower === 'admin@propmatch.com' || emailLower === 'propmatchspot@gmail.com') {
-            console.log("Admin access granted via hardcoded whitelist:", emailLower);
-            setIsAdmin(true);
-            return;
-        }
-
         try {
-            // 2. Check 'profiles' table for role
+            // Check 'profiles' table for role, OR use a hardcoded email list for simplicity initially
+            // For now, let's allow 'admin@propmatch.com' and the user's email if they registered as admin
+            // Ideally: SELECT role FROM profiles WHERE id = user.id
+
             const { data, error } = await supabase
                 .from('profiles')
                 .select('role')
@@ -92,7 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (data && data.role === 'admin') {
                 setIsAdmin(true);
             } else {
-                setIsAdmin(false);
+                // FALLBACK: Hardcoded admin check for development
+                if (user.email === 'admin@propmatch.com') {
+                    setIsAdmin(true);
+                } else {
+                    setIsAdmin(false);
+                }
             }
         } catch (error) {
             console.error('Error checking admin status:', error);
