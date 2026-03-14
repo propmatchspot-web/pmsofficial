@@ -8,6 +8,7 @@ import {
     Trash2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import { useModal } from '../../context/ModalContext';
 
 interface Profile {
     id: string;
@@ -20,6 +21,7 @@ interface Profile {
 }
 
 const AdminUsersPage: React.FC = () => {
+    const { showModal } = useModal();
     const [searchTerm, setSearchTerm] = useState('');
     const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -47,17 +49,25 @@ const AdminUsersPage: React.FC = () => {
     }, []);
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-
-        try {
-            // Delete from profiles (and potentially auth via edge function if set up, but here just db)
-            const { error } = await supabase.from('profiles').delete().eq('id', id);
-            if (error) throw error;
-            setUsers(users.filter(u => u.id !== id));
-        } catch (error) {
-            console.error('Error deleting user:', error);
-            alert('Failed to delete user');
-        }
+        showModal({
+            type: 'confirm',
+            title: 'Delete User',
+            message: 'Are you sure you want to delete this user? This action cannot be undone.',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                try {
+                    // Delete from profiles (and potentially auth via edge function if set up, but here just db)
+                    const { error } = await supabase.from('profiles').delete().eq('id', id);
+                    if (error) throw error;
+                    setUsers(users.filter(u => u.id !== id));
+                    showModal({ type: 'success', title: 'Deleted', message: 'User deleted successfully.' });
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    showModal({ type: 'error', title: 'Error', message: 'Failed to delete user.' });
+                }
+            }
+        });
     };
 
     const formatDate = (dateString: string) => {
@@ -128,8 +138,8 @@ const AdminUsersPage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${user.role === 'admin'
-                                                    ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-                                                    : 'bg-brand-black border-brand-border text-brand-muted'
+                                                ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                                                : 'bg-brand-black border-brand-border text-brand-muted'
                                                 }`}>
                                                 {user.role === 'admin' && <Shield size={10} />}
                                                 {user.role}
@@ -140,8 +150,8 @@ const AdminUsersPage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${user.status === 'active'
-                                                    ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                                    : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                                : 'bg-red-500/10 text-red-500 border-red-500/20'
                                                 }`}>
                                                 {user.status || 'active'}
                                             </span>

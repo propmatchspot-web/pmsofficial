@@ -1,50 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Share, Star, Info, CheckCircle, Plus, X, ChevronDown, Trophy, Shield, Calendar, DollarSign } from 'lucide-react';
+import { Share, Star, Plus, X, ChevronDown, Trophy, Shield, Calendar, DollarSign } from 'lucide-react';
 import { FirmService } from '../lib/services';
 import { PropFirm } from '../types';
+import FirmLogo from '../components/FirmLogo';
+import { useComparison } from '../context/ComparisonContext';
 
 const ComparePage: React.FC = () => {
-  const [firms, setFirms] = useState<PropFirm[]>([]);
-  const [selectedFirmIds, setSelectedFirmIds] = useState<(string | null)[]>([null, null, null]);
-  const [loading, setLoading] = useState(true);
+  const { selectedFirms, removeFirm, toggleFirm } = useComparison();
+  const [allFirms, setAllFirms] = useState<PropFirm[]>([]);
+
+  // Array of 3 slots, filled with selected firms
+  const slots = [0, 1, 2].map(i => selectedFirms[i] || null);
 
   useEffect(() => {
+    // We still fetch all firms to populate the dropdowns/add buttons
     const fetchFirms = async () => {
-      setLoading(true);
-      try {
-        const data = await FirmService.getActiveFirms();
-        setFirms(data || []);
-
-        // Pre-select first 3 firms if available
-        if (data && data.length > 0) {
-          const initialIds = [...selectedFirmIds];
-          if (data.length >= 1) initialIds[0] = data[0].id;
-          if (data.length >= 2) initialIds[1] = data[1].id;
-          if (data.length >= 3) initialIds[2] = data[2].id;
-          setSelectedFirmIds(initialIds);
-        }
-      } catch (err) {
-        console.error('Error fetching firms:', err);
-      } finally {
-        setLoading(false);
-      }
+      const data = await FirmService.getActiveFirms();
+      setAllFirms(data || []);
     };
     fetchFirms();
   }, []);
 
-  const handleSelectFirm = (index: number, firmId: string) => {
-    const newSelected = [...selectedFirmIds];
-    newSelected[index] = firmId;
-    setSelectedFirmIds(newSelected);
+  const handleSelectFirm = (firmId: string) => {
+    const firm = allFirms.find(f => f.id === firmId);
+    if (firm) toggleFirm(firm);
   };
-
-  const handleRemoveFirm = (index: number) => {
-    const newSelected = [...selectedFirmIds];
-    newSelected[index] = null;
-    setSelectedFirmIds(newSelected);
-  };
-
-  const getFirmById = (id: string | null) => firms.find(f => f.id === id);
 
   return (
     <div className="pt-24 pb-20 min-h-screen bg-brand-black text-white font-sans">
@@ -82,16 +62,16 @@ const ComparePage: React.FC = () => {
 
               {/* Firm Selectors */}
               {[0, 1, 2].map((index) => {
-                const selectedFirm = getFirmById(selectedFirmIds[index]);
+                const selectedFirm = slots[index];
                 return (
                   <div key={index} className="p-4 border-r border-brand-border relative group last:border-r-0 min-w-[150px]">
                     {selectedFirm ? (
                       <div className="flex flex-col h-full justify-between gap-4">
                         <div className="flex items-start justify-between">
-                          <div className="size-12 rounded-xl border border-brand-border bg-brand-charcoal p-1 overflow-hidden shrink-0 flex items-center justify-center">
-                            <img src={selectedFirm.logo} alt={selectedFirm.name} className="w-full h-full object-contain" />
+                          <div className="shrink-0">
+                            <FirmLogo src={selectedFirm.logo} alt={selectedFirm.name} size="md" className="rounded-xl" />
                           </div>
-                          <button onClick={() => handleRemoveFirm(index)} className="text-brand-muted hover:text-red-400 transition-colors">
+                          <button onClick={() => removeFirm(selectedFirm.id)} className="text-brand-muted hover:text-red-400 transition-colors">
                             <X size={20} />
                           </button>
                         </div>
@@ -108,9 +88,9 @@ const ComparePage: React.FC = () => {
                             <select
                               className="w-full bg-brand-charcoal border border-brand-border rounded-lg text-xs md:text-sm text-white px-2 py-1.5 pr-6 focus:border-brand-gold focus:ring-0 appearance-none cursor-pointer outline-none transition-all hover:border-brand-gold/50"
                               value={selectedFirm.id}
-                              onChange={(e) => handleSelectFirm(index, e.target.value)}
+                              onChange={(e) => handleSelectFirm(e.target.value)}
                             >
-                              {firms.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                              {allFirms.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                             </select>
                             <ChevronDown className="absolute right-2 top-2 text-brand-muted pointer-events-none" size={14} />
                           </div>
@@ -121,11 +101,11 @@ const ComparePage: React.FC = () => {
                         <div className="relative h-full flex items-center">
                           <select
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            onChange={(e) => handleSelectFirm(index, e.target.value)}
+                            onChange={(e) => handleSelectFirm(e.target.value)}
                             value=""
                           >
                             <option value="" disabled>Select Firm</option>
-                            {firms.filter(f => !selectedFirmIds.includes(f.id)).map(f => (
+                            {allFirms.filter(f => !selectedFirms.some(sf => sf.id === f.id)).map(f => (
                               <option key={f.id} value={f.id}>{f.name}</option>
                             ))}
                           </select>
@@ -168,8 +148,8 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
-                          <span className="font-bold text-white text-lg">{getFirmById(selectedFirmIds[i])?.profitSplit || '80%'}</span>
+                        {slots[i] ? (
+                          <span className="font-bold text-white text-lg">{slots[i]?.profitSplit || '80%'}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}
@@ -182,12 +162,12 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
+                        {slots[i] ? (
                           <div className="flex items-center justify-center gap-2">
                             <div className="h-2 w-16 bg-brand-black rounded-full overflow-hidden">
-                              <div className="h-full bg-green-500" style={{ width: `${getFirmById(selectedFirmIds[i])?.trustScore || 80}%` }}></div>
+                              <div className="h-full bg-green-500" style={{ width: `${slots[i]?.trustScore || 80}%` }}></div>
                             </div>
-                            <span className="font-bold text-white">{getFirmById(selectedFirmIds[i])?.trustScore || 0}/100</span>
+                            <span className="font-bold text-white">{slots[i]?.trustScore || 0}/100</span>
                           </div>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
@@ -201,8 +181,8 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
-                          <span className="font-medium text-white text-base">${(getFirmById(selectedFirmIds[i])?.maxFunding || 0).toLocaleString()}</span>
+                        {slots[i] ? (
+                          <span className="font-medium text-white text-base">${(slots[i]?.maxFunding || 0).toLocaleString()}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}
@@ -215,8 +195,8 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
-                          <span className="font-medium text-white">{getFirmById(selectedFirmIds[i])?.drawdown || '10%'}</span>
+                        {slots[i] ? (
+                          <span className="font-medium text-white">{slots[i]?.drawdown || '10%'}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}
@@ -237,8 +217,8 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
-                          <span className="text-white">{getFirmById(selectedFirmIds[i])?.foundedYear || getFirmById(selectedFirmIds[i])?.founded}</span>
+                        {slots[i] ? (
+                          <span className="text-white">{slots[i]?.foundedYear || slots[i]?.founded}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}
@@ -250,8 +230,8 @@ const ComparePage: React.FC = () => {
                     </td>
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
-                        {selectedFirmIds[i] ? (
-                          <span className="text-white">{getFirmById(selectedFirmIds[i])?.hqLocation || 'Unknown'}</span>
+                        {slots[i] ? (
+                          <span className="text-white">{slots[i]?.hqLocation || 'Unknown'}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}
@@ -263,14 +243,20 @@ const ComparePage: React.FC = () => {
                   <tr>
                     <td className="p-4 border-r border-brand-border bg-brand-charcoal"></td>
                     {[0, 1, 2].map(i => {
-                      const firm = getFirmById(selectedFirmIds[i]);
+                      const firm = slots[i];
                       return (
                         <td key={i} className="p-6 border-r last:border-r-0 border-brand-border bg-brand-charcoal">
                           {firm ? (
                             <div className="flex justify-center">
-                              <a className="w-full max-w-[180px] bg-brand-gold hover:bg-brand-goldHover text-brand-black text-center py-2.5 rounded-lg font-bold text-sm transition-transform hover:scale-105 shadow-[0_0_15px_rgba(246,174,19,0.15)]" href={firm.website || '#'} target="_blank" rel="noreferrer">
+                              <button
+                                onClick={() => {
+                                  FirmService.trackClick(firm.id, 'comparison_table');
+                                  window.open(firm.website, '_blank');
+                                }}
+                                className="w-full max-w-[180px] bg-brand-gold hover:bg-brand-goldHover text-brand-black text-center py-2.5 rounded-lg font-bold text-sm transition-transform hover:scale-105 shadow-[0_0_15px_rgba(246,174,19,0.15)]"
+                              >
                                 Visit Site
-                              </a>
+                              </button>
                             </div>
                           ) : (
                             <div className="flex justify-center"><span className="text-brand-muted text-sm">--</span></div>

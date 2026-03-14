@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
     Plus,
     Search,
-    Filter,
     Edit2,
     Trash2,
+    X,
+    Tag,
+    CheckCircle,
+    XCircle,
     Copy,
     Calendar,
-    XCircle,
     Loader2
 } from 'lucide-react';
+import Button from '../../components/Button';
+import { useModal } from '../../context/ModalContext';
 import { supabase } from '../../lib/supabaseClient';
 
 interface Offer {
@@ -30,6 +34,7 @@ interface Firm {
 }
 
 const AdminOffersPage: React.FC = () => {
+    const { showModal } = useModal();
     const [offers, setOffers] = useState<Offer[]>([]);
     const [firms, setFirms] = useState<Firm[]>([]);
     const [loading, setLoading] = useState(true);
@@ -44,13 +49,19 @@ const AdminOffersPage: React.FC = () => {
             setLoading(true);
             try {
                 // Fetch Offers with Firm Names
+                // Use a try-catch for the specific join in case the relationship doesn't exist yet
                 const { data: offersData, error: offersError } = await supabase
                     .from('offers')
                     .select('*, firms(name)')
                     .order('created_at', { ascending: false });
 
-                if (offersError) throw offersError;
-                setOffers(offersData || []);
+                if (offersError) {
+                    console.error('Error fetching offers:', offersError);
+                    // Don't throw, just set empty so page renders
+                    setOffers([]);
+                } else {
+                    setOffers(offersData || []);
+                }
 
                 // Fetch Firms for Dropdown
                 const { data: firmsData, error: firmsError } = await supabase
@@ -59,17 +70,19 @@ const AdminOffersPage: React.FC = () => {
                     .eq('status', 'active')
                     .order('name');
 
-                if (firmsError) throw firmsError;
+                if (firmsError) console.error('Error fetching firms:', firmsError);
                 setFirms(firmsData || []);
 
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Unexpected error in AdminOffersPage:', error);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, []);
+
 
     const handleEdit = (offer: Offer) => {
         setSelectedOffer(offer);
@@ -82,15 +95,24 @@ const AdminOffersPage: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Delete this offer?')) return;
-        try {
-            const { error } = await supabase.from('offers').delete().eq('id', id);
-            if (error) throw error;
-            setOffers(offers.filter(o => o.id !== id));
-        } catch (error) {
-            console.error('Error deleting offer:', error);
-            alert('Failed to delete offer');
-        }
+        showModal({
+            type: 'confirm',
+            title: 'Delete Offer',
+            message: 'Are you sure you want to delete this offer?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                try {
+                    const { error } = await supabase.from('offers').delete().eq('id', id);
+                    if (error) throw error;
+                    setOffers(offers.filter(o => o.id !== id));
+                    showModal({ type: 'success', title: 'Deleted', message: 'Offer deleted successfully.' });
+                } catch (error) {
+                    console.error('Error deleting offer:', error);
+                    showModal({ type: 'error', title: 'Error', message: 'Failed to delete offer.' });
+                }
+            }
+        });
     };
 
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -132,9 +154,10 @@ const AdminOffersPage: React.FC = () => {
                 setOffers([data, ...offers]);
             }
             setIsModalOpen(false);
+            showModal({ type: 'success', title: 'Success', message: 'Offer saved successfully!' });
         } catch (error) {
             console.error('Error saving offer:', error);
-            alert('Failed to save offer');
+            showModal({ type: 'error', title: 'Error', message: 'Failed to save offer.' });
         } finally {
             setSaving(false);
         }
@@ -219,7 +242,7 @@ const AdminOffersPage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${offer.status === 'active' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                    'bg-red-500/10 text-red-500 border-red-500/20'
+                                                'bg-red-500/10 text-red-500 border-red-500/20'
                                                 }`}>
                                                 {offer.status}
                                             </span>

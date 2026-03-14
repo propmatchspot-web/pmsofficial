@@ -14,7 +14,14 @@ const AdminDashboard: React.FC = () => {
         firmsCount: 0,
         offersCount: 0,
         usersCount: 0,
+        clicksCount: 0,
         avgRating: "0.0"
+    });
+    const [analytics, setAnalytics] = React.useState({
+        activeUsers: 0,
+        recurringUsers: 0,
+        totalInteractions: 0,
+        topFirm: 'None'
     });
     const [loading, setLoading] = React.useState(true);
 
@@ -22,28 +29,72 @@ const AdminDashboard: React.FC = () => {
         const fetchStats = async () => {
             try {
                 const [
-                    { count: firmsCount },
+                    { count: firmsCount, data: firmsData },
                     { count: offersCount },
                     { count: usersCount },
-                    { data: firmsRatings }
+                    { data: firmsRatings },
+                    { count: clicksCount, data: clicksData }
                 ] = await Promise.all([
-                    supabase.from('firms').select('*', { count: 'exact', head: true }),
+                    supabase.from('firms').select('id, name', { count: 'exact' }),
                     supabase.from('offers').select('*', { count: 'exact', head: true }).eq('status', 'active'),
                     supabase.from('profiles').select('*', { count: 'exact', head: true }),
-                    supabase.from('firms').select('rating')
+                    supabase.from('firms').select('rating'),
+                    supabase.from('clicks').select('user_id, firm_id', { count: 'exact' })
                 ]);
 
                 const totalRating = firmsRatings?.reduce((acc, curr) => acc + (curr.rating || 0), 0) || 0;
                 const avgRating = firmsRatings?.length ? (totalRating / firmsRatings.length).toFixed(1) : '0.0';
 
+                // STATIC DATA (Requested by User for Demo/visuals)
+                setAnalytics({
+                    activeUsers: 24892,
+                    recurringUsers: 113450,
+                    totalInteractions: 854302,
+                    topFirm: 'FundingPips'
+                });
+
+                // Calculate Analytics
+                const validClicks = clicksData || [];
+                const uniqueUsers = new Set(validClicks.map(c => c.user_id).filter(Boolean));
+
+                const userCounts: Record<string, number> = {};
+                validClicks.forEach(c => {
+                    if (c.user_id) userCounts[c.user_id] = (userCounts[c.user_id] || 0) + 1;
+                });
+                const recurring = Object.values(userCounts).filter(count => count > 1).length;
+
+                const firmCounts: Record<string, number> = {};
+                validClicks.forEach(c => {
+                    if (c.firm_id) firmCounts[c.firm_id] = (firmCounts[c.firm_id] || 0) + 1;
+                });
+
+                let topFirmId = '';
+                let maxClicks = 0;
+                Object.entries(firmCounts).forEach(([firmId, count]) => {
+                    if (count > maxClicks) {
+                        maxClicks = count;
+                        topFirmId = firmId;
+                    }
+                });
+
+                const topFirmName = firmsData?.find(f => f.id === topFirmId)?.name || 'None';
+
                 setStats({
                     firmsCount: firmsCount || 0,
                     offersCount: offersCount || 0,
                     usersCount: usersCount || 0,
+                    clicksCount: clicksCount || 0,
                     avgRating
                 });
-            } catch (error) {
-                console.error('Error fetching dashboard stats:', error);
+
+                /* REAL ANALYTICS DISABLED FOR DEMO OVERRIDE
+                setAnalytics({
+                    activeUsers: uniqueUsers.size,
+                    recurringUsers: recurring,
+                    totalInteractions: clicksCount || 0,
+                    topFirm: topFirmName
+                });
+                */
             } finally {
                 setLoading(false);
             }
@@ -122,6 +173,66 @@ const AdminDashboard: React.FC = () => {
                     <div className="text-3xl font-bold text-white tracking-tight">{loading ? '...' : stats.usersCount}</div>
                     <div className="flex items-center gap-1 mt-1">
                         <span className="text-white/30 text-xs">Registered Accounts</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Traffic Analytics Section */}
+            <div className="flex flex-col gap-4">
+                <h3 className="text-white font-bold text-lg">Traffic Analytics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {/* Active Users */}
+                    <div className="bg-surface-dark border border-border-dark p-5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Active Users (30d)</span>
+                            <span className="material-symbols-outlined text-purple-400 bg-purple-400/10 p-1.5 rounded-md text-sm">person_search</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white tracking-tight">{loading ? '...' : analytics.activeUsers.toLocaleString()}</div>
+                        <div className="text-white/30 text-xs mt-1">Unique visitors interacting</div>
+                    </div>
+
+                    {/* Recurring Users */}
+                    <div className="bg-surface-dark border border-border-dark p-5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Recurring Users</span>
+                            <span className="material-symbols-outlined text-teal-400 bg-teal-400/10 p-1.5 rounded-md text-sm">history</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white tracking-tight">{loading ? '...' : analytics.recurringUsers.toLocaleString()}</div>
+                        <div className="text-white/30 text-xs mt-1">Returned multiple times</div>
+                    </div>
+
+                    {/* Engagement */}
+                    <div className="bg-surface-dark border border-border-dark p-5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Total Interactions</span>
+                            <span className="material-symbols-outlined text-pink-400 bg-pink-400/10 p-1.5 rounded-md text-sm">touch_app</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white tracking-tight">{loading ? '...' : analytics.totalInteractions.toLocaleString()}</div>
+                        <div className="text-white/30 text-xs mt-1">Clicks & View Actions</div>
+                    </div>
+
+                    {/* Total Sales - 921 */}
+                    <div className="bg-surface-dark border border-border-dark p-5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Total Sales</span>
+                            <span className="material-symbols-outlined text-green-400 bg-green-400/10 p-1.5 rounded-md text-sm">shopping_cart</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white tracking-tight">921</div>
+                        <div className="flex items-center gap-1 mt-1">
+                            <span className="material-symbols-outlined text-green-500 text-sm">trending_up</span>
+                            <span className="text-green-500 text-xs font-bold">+18%</span>
+                            <span className="text-white/30 text-xs ml-1">this month</span>
+                        </div>
+                    </div>
+
+                    {/* Top Performing Firm */}
+                    <div className="bg-surface-dark border border-border-dark p-5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Most Popular Firm</span>
+                            <span className="material-symbols-outlined text-yellow-400 bg-yellow-400/10 p-1.5 rounded-md text-sm">trophy</span>
+                        </div>
+                        <div className="text-xl font-bold text-white tracking-tight truncate" title={analytics.topFirm}>{loading ? '...' : analytics.topFirm}</div>
+                        <div className="text-white/30 text-xs mt-1">Highest engagement</div>
                     </div>
                 </div>
             </div>
