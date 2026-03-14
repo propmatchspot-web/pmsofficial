@@ -19,7 +19,6 @@ import {
   Layers
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
-import { useModal } from '../../context/ModalContext';
 
 interface Challenge {
   id?: string;
@@ -30,7 +29,6 @@ interface Challenge {
   daily_drawdown: string;
   max_drawdown: string;
   min_trading_days: string;
-  challenge_type?: '1-Step' | '2-Step' | '3-Step' | 'Instant';
 }
 
 interface Firm {
@@ -39,7 +37,6 @@ interface Firm {
   website: string | null;
   affiliate_link: string | null;
   logo_url: string | null;
-  favicon: string | null;
   rating: number;
   status: string;
   description?: string;
@@ -48,15 +45,9 @@ interface Firm {
   profit_split?: string;
   platforms?: string[];
   challenges?: { id: string }[];
-  // Payout Stats
-  avg_payout_time?: string;
-  payout_percentage?: number;
-  last_30_days_payouts?: string;
-  payout_growth?: string;
 }
 
 const AdminFirmsPage: React.FC = () => {
-  const { showModal } = useModal();
   const [firms, setFirms] = useState<Firm[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,40 +122,28 @@ const AdminFirmsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    showModal({
-      type: 'confirm',
-      title: 'Delete Firm',
-      message: 'Are you sure you want to delete this firm? This will also delete all its challenges.',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      onConfirm: async () => {
-        try {
-          const { error } = await supabase.from('firms').delete().eq('id', id);
-          if (error) throw error;
-          setFirms(firms.filter(f => f.id !== id));
-          showModal({ type: 'success', title: 'Deleted', message: 'Firm deleted successfully.' });
-        } catch (error) {
-          console.error('Error deleting firm:', error);
-          showModal({ type: 'error', title: 'Error', message: 'Failed to delete firm.' });
-        }
-      }
-    });
+    if (!window.confirm('Are you sure you want to delete this firm? This will also delete all its challenges.')) return;
+
+    try {
+      const { error } = await supabase.from('firms').delete().eq('id', id);
+      if (error) throw error;
+      setFirms(firms.filter(f => f.id !== id));
+    } catch (error) {
+      console.error('Error deleting firm:', error);
+      alert('Failed to delete firm');
+    }
   };
 
   // Handle Challenge Input Changes locally
   const updateChallenge = (index: number, field: keyof Challenge, value: string) => {
-    setChallenges(prev => {
-      const newChallenges = [...prev];
-      newChallenges[index] = { ...newChallenges[index], [field]: value };
-      // If updating challenge_type, ensure explicit value is stored
-      return newChallenges;
-    });
+    const newChallenges = [...challenges];
+    newChallenges[index] = { ...newChallenges[index], [field]: value };
+    setChallenges(newChallenges);
   };
 
   const addChallengeRow = () => {
     setChallenges([...challenges, {
-      name: '2-Step Evaluation',
-      challenge_type: '2-Step',
+      name: 'New Challenge',
       account_size: '$10,000',
       price: '$99',
       profit_target: '8%',
@@ -186,35 +165,18 @@ const AdminFirmsPage: React.FC = () => {
     setSaving(true);
 
     const formData = new FormData(e.currentTarget);
-    const platformsRaw = formData.get('platforms') as string || '';
     const firmData = {
       name: formData.get('name') as string,
       website: formData.get('website') as string,
       affiliate_link: formData.get('affiliate_link') as string,
       logo_url: formData.get('logo_url') as string,
-      favicon: formData.get('favicon') as string,
       rating: parseFloat(formData.get('rating') as string) || 0,
       status: formData.get('status') as string,
       description: formData.get('description') as string,
       founded_year: formData.get('founded_year') as string,
       hq_location: formData.get('hq_location') as string,
       profit_split: formData.get('profit_split') as string,
-      platforms: platformsRaw ? platformsRaw.split(',').map(p => p.trim()).filter(p => p) : [],
-      // Trading Specs
-      max_funding: parseInt(formData.get('max_funding') as string) || 0,
-      drawdown: formData.get('drawdown') as string || '10%',
-      tags: (formData.get('tags') as string || '').split(',').map(t => t.trim()).filter(t => t),
-      leverage: formData.get('leverage') as string || '1:100',
-      news_trading: formData.get('news_trading') === 'on',
-      weekend_holding: formData.get('weekend_holding') === 'on',
-      scaling_plan: formData.get('scaling_plan') === 'on',
-      scaling_plan_details: formData.get('scaling_plan_details') as string || '',
-      discount_code: formData.get('discount_code') as string || '',
-      // Payout Stats
-      avg_payout_time: formData.get('avg_payout_time') as string || '12 Hours',
-      payout_percentage: parseInt(formData.get('payout_percentage') as string) || 95,
-      last_30_days_payouts: formData.get('last_30_days_payouts') as string || '$4.2M+',
-      payout_growth: formData.get('payout_growth') as string || '+12%',
+      platforms: (formData.get('platforms') as string).split(',').map(p => p.trim()),
     };
 
     console.log("handleSave: Prepared firmData", firmData);
@@ -267,7 +229,6 @@ const AdminFirmsPage: React.FC = () => {
         const challengesToInsert = challenges.map(c => ({
           firm_id: firmId,
           name: c.name,
-          challenge_type: c.challenge_type || '2-Step',
           account_size: c.account_size,
           price: c.price,
           profit_target: c.profit_target,
@@ -283,10 +244,9 @@ const AdminFirmsPage: React.FC = () => {
 
       console.log("handleSave: Completed successfully, closing modal.");
       setIsModalOpen(false);
-      showModal({ type: 'success', title: 'Success', message: 'Firm saved successfully!' });
     } catch (error: any) {
       console.error('Error saving firm:', error);
-      showModal({ type: 'error', title: 'Error', message: `Error: ${error.message || 'Unknown error occurred'}` });
+      alert(`Error: ${error.message || 'Unknown error occurred'}`);
     } finally {
       console.log("handleSave: Finally block executed, stopping spinner.");
       setSaving(false);
@@ -416,305 +376,191 @@ const AdminFirmsPage: React.FC = () => {
 
               {/* Scrollable Content */}
               <div className="p-6 overflow-y-auto flex-1">
-                {/* DETAILS TAB - Use CSS to hide instead of removing from DOM */}
-                <div className={activeTab === 'details' ? 'space-y-6' : 'hidden'}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Firm Name</label>
-                      <input name="name" required defaultValue={selectedFirm?.name} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="e.g. Apex Trader" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Status</label>
-                      <select name="status" defaultValue={selectedFirm?.status || 'draft'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none">
-                        <option value="active">Active (Visible)</option>
-                        <option value="draft">Draft (Hidden)</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-brand-muted uppercase">Description</label>
-                    <textarea name="description" rows={3} defaultValue={selectedFirm?.description || ''} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="Short bio of the firm..." />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Website URL</label>
-                      <div className="relative">
-                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="website" defaultValue={selectedFirm?.website || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="https://" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Affiliate Link</label>
-                      <div className="relative">
-                        <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="affiliate_link" defaultValue={selectedFirm?.affiliate_link || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="?ref=..." />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Logo URL</label>
-                      <div className="relative">
-                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="logo_url" defaultValue={selectedFirm?.logo_url || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="https://..." />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Favicon URL (for Popups)</label>
-                      <div className="relative">
-                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="favicon" defaultValue={selectedFirm?.favicon || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="https://.../favicon.ico" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <h4 className="text-white font-bold border-b border-brand-border pb-2 mt-4">Firm Specifics</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Founded Year</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="founded_year" defaultValue={selectedFirm?.founded_year || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="2023" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">HQ Location</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="hq_location" defaultValue={selectedFirm?.hq_location || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="USA, Dubai..." />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Profit Split</label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                        <input name="profit_split" defaultValue={selectedFirm?.profit_split || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="Up to 90%" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-brand-muted uppercase">Trust Score</label>
-                      <input name="rating" type="number" step="0.1" max="5" defaultValue={selectedFirm?.rating || 4.5} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-brand-muted uppercase">Platforms (comma separated)</label>
-                    <div className="relative">
-                      <Layers className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
-                      <input name="platforms" defaultValue={selectedFirm?.platforms?.join(', ') || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="MT4, MT5, cTrader, TradeLocker" />
-                    </div>
-                  </div>
-
-                  {/* Trading Specs Section */}
-                  <div className="border-t border-brand-border pt-6 mt-6">
-                    <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                      <TrendingDown size={18} className="text-brand-gold" />
-                      Trading Specifications
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Max Funding ($)</label>
-                        <input name="max_funding" type="number" defaultValue={(selectedFirm as any)?.max_funding || 200000} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="200000" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Max Drawdown</label>
-                        <input name="drawdown" defaultValue={(selectedFirm as any)?.drawdown || '10%'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="10%" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Leverage</label>
-                        <input name="leverage" defaultValue={(selectedFirm as any)?.leverage || '1:100'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="1:100" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Discount Code</label>
-                        <input name="discount_code" defaultValue={(selectedFirm as any)?.discount_code || ''} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="SAVE20" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Tags (comma separated, e.g. FOREX, CRYPTO)</label>
-                        <input name="tags" defaultValue={(selectedFirm as any)?.tags?.join(', ') || ''} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="FOREX, CRYPTO, INSTANT" />
-                      </div>
-                      <div className="flex items-center gap-6 pt-6">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" name="news_trading" defaultChecked={(selectedFirm as any)?.news_trading || false} className="rounded border-brand-border bg-background-dark text-brand-gold focus:ring-brand-gold" />
-                          <span className="text-sm text-white">News Trading Allowed</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" name="weekend_holding" defaultChecked={(selectedFirm as any)?.weekend_holding || false} className="rounded border-brand-border bg-background-dark text-brand-gold focus:ring-brand-gold" />
-                          <span className="text-sm text-white">Weekend Holding Allowed</span>
-                        </label>
-                      </div>
-
-                      {/* Scaling Plan Section */}
-                      <div className="bg-brand-charcoal/50 p-4 rounded-lg border border-brand-border mt-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input
-                              type="checkbox"
-                              name="scaling_plan"
-                              defaultChecked={selectedFirm?.scaling_plan !== false}
-                              className="rounded border-brand-border bg-background-dark text-brand-gold focus:ring-brand-gold w-4 h-4"
-                            />
-                            <span className="font-bold text-white uppercase text-xs tracking-wider">Enable Scaling Plan</span>
-                          </label>
-                        </div>
-                        <input
-                          name="scaling_plan_details"
-                          defaultValue={selectedFirm?.scaling_plan_details || 'Yes (every 3 months)'}
-                          className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none text-sm placeholder:text-brand-muted/50"
-                          placeholder="e.g. Yes (every 3 months) - scale up 25%"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Payout Stats Section */}
-                  <div className="border-t border-brand-border pt-6 mt-6">
-                    <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                      <DollarSign size={18} className="text-brand-gold" />
-                      Payout Performance Stats
-                    </h4>
+                {/* DETAILS TAB */}
+                {activeTab === 'details' && (
+                  <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Average Payout Time</label>
-                        <input name="avg_payout_time" defaultValue={selectedFirm?.avg_payout_time || '12 Hours'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="12 Hours" />
+                        <label className="text-xs font-bold text-brand-muted uppercase">Firm Name</label>
+                        <input name="name" required defaultValue={selectedFirm?.name} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="e.g. Apex Trader" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Payout Percentage (% within 24h)</label>
-                        <input name="payout_percentage" type="number" defaultValue={selectedFirm?.payout_percentage || 95} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="95" />
+                        <label className="text-xs font-bold text-brand-muted uppercase">Status</label>
+                        <select name="status" defaultValue={selectedFirm?.status || 'draft'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none">
+                          <option value="active">Active (Visible)</option>
+                          <option value="draft">Draft (Hidden)</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-brand-muted uppercase">Description</label>
+                      <textarea name="description" rows={3} defaultValue={selectedFirm?.description || ''} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="Short bio of the firm..." />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-brand-muted uppercase">Website URL</label>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="website" defaultValue={selectedFirm?.website || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="https://" />
+                        </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Last 30 Days Payouts</label>
-                        <input name="last_30_days_payouts" defaultValue={selectedFirm?.last_30_days_payouts || '$4.2M+'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="$4.2M+" />
+                        <label className="text-xs font-bold text-brand-muted uppercase">Affiliate Link</label>
+                        <div className="relative">
+                          <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="affiliate_link" defaultValue={selectedFirm?.affiliate_link || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="?ref=..." />
+                        </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-bold text-brand-muted uppercase">Payout Growth (vs last month)</label>
-                        <input name="payout_growth" defaultValue={selectedFirm?.payout_growth || '+12%'} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" placeholder="+12%" />
+                        <label className="text-xs font-bold text-brand-muted uppercase">Logo URL</label>
+                        <div className="relative">
+                          <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="logo_url" defaultValue={selectedFirm?.logo_url || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="https://..." />
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 className="text-white font-bold border-b border-brand-border pb-2 mt-4">Firm Specifics</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-brand-muted uppercase">Founded Year</label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="founded_year" defaultValue={selectedFirm?.founded_year || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="2023" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-brand-muted uppercase">HQ Location</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="hq_location" defaultValue={selectedFirm?.hq_location || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="USA, Dubai..." />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-brand-muted uppercase">Profit Split</label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                          <input name="profit_split" defaultValue={selectedFirm?.profit_split || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="Up to 90%" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-brand-muted uppercase">Trust Score</label>
+                        <input name="rating" type="number" step="0.1" max="5" defaultValue={selectedFirm?.rating || 4.5} className="w-full bg-background-dark border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-brand-muted uppercase">Platforms (comma separated)</label>
+                      <div className="relative">
+                        <Layers className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" size={16} />
+                        <input name="platforms" defaultValue={selectedFirm?.platforms?.join(', ') || ''} className="w-full bg-background-dark border border-brand-border rounded-lg pl-10 pr-3 py-3 text-white focus:border-brand-gold outline-none" placeholder="MT4, MT5, cTrader, TradeLocker" />
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* CHALLENGES TAB - Use CSS to hide instead of removing from DOM */}
-                <div className={activeTab === 'challenges' ? 'space-y-6' : 'hidden'}>
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-white font-bold">Funded Account Types</h4>
-                    <button type="button" onClick={addChallengeRow} className="text-xs bg-brand-gold text-brand-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-white transition-colors">
-                      <Plus size={14} /> Add Account Type
-                    </button>
-                  </div>
-
-                  {challenges.length === 0 ? (
-                    <div className="text-center py-10 bg-background-dark rounded-xl border border-dashed border-brand-border text-brand-muted">
-                      No account types defined yet. Click "Add Account Type" to start.
+                {/* CHALLENGES TAB */}
+                {activeTab === 'challenges' && (
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-white font-bold">Funded Account Types</h4>
+                      <button type="button" onClick={addChallengeRow} className="text-xs bg-brand-gold text-brand-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-white transition-colors">
+                        <Plus size={14} /> Add Account Type
+                      </button>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {challenges.map((challenge, idx) => (
-                        <div key={idx} className="bg-background-dark border border-brand-border p-4 rounded-xl relative group">
-                          <button
-                            type="button"
-                            onClick={() => removeChallengeRow(idx)}
-                            className="absolute top-2 right-2 text-brand-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <XCircle size={20} />
-                          </button>
 
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <div className="space-y-2">
+                    {challenges.length === 0 ? (
+                      <div className="text-center py-10 bg-background-dark rounded-xl border border-dashed border-brand-border text-brand-muted">
+                        No account types defined yet. Click "Add Account Type" to start.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {challenges.map((challenge, idx) => (
+                          <div key={idx} className="bg-background-dark border border-brand-border p-4 rounded-xl relative group">
+                            <button
+                              type="button"
+                              onClick={() => removeChallengeRow(idx)}
+                              className="absolute top-2 right-2 text-brand-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <XCircle size={20} />
+                            </button>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                               <div className="space-y-1">
-                                <label className="text-[10px] uppercase text-brand-muted font-bold">Type</label>
-                                <select
-                                  value={challenge.challenge_type || '2-Step'}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    updateChallenge(idx, 'challenge_type', val);
-                                    // Auto-set name if generic
-                                    if (!challenge.name || challenge.name.includes('Step') || challenge.name === 'New Challenge') {
-                                      updateChallenge(idx, 'name', val + ' Evaluation');
-                                    }
-                                  }}
-                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold outline-none"
-                                >
-                                  <option value="1-Step">1-Step</option>
-                                  <option value="2-Step">2-Step</option>
-                                  <option value="3-Step">3-Step</option>
-                                  <option value="Instant">Instant</option>
-                                </select>
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-[10px] uppercase text-brand-muted font-bold">Display Name</label>
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Challenge Name</label>
                                 <input
                                   value={challenge.name}
                                   onChange={(e) => updateChallenge(idx, 'name', e.target.value)}
                                   className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                  placeholder="e.g. Stellar 1-Step"
+                                  placeholder="Standard"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Account Size</label>
+                                <input
+                                  value={challenge.account_size}
+                                  onChange={(e) => updateChallenge(idx, 'account_size', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="$10,000"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Price</label>
+                                <input
+                                  value={challenge.price}
+                                  onChange={(e) => updateChallenge(idx, 'price', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="$99"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Min Days</label>
+                                <input
+                                  value={challenge.min_trading_days}
+                                  onChange={(e) => updateChallenge(idx, 'min_trading_days', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="5"
                                 />
                               </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Account Size</label>
-                              <input
-                                value={challenge.account_size}
-                                onChange={(e) => updateChallenge(idx, 'account_size', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="$10,000"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Price</label>
-                              <input
-                                value={challenge.price}
-                                onChange={(e) => updateChallenge(idx, 'price', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="$99"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Min Days</label>
-                              <input
-                                value={challenge.min_trading_days}
-                                onChange={(e) => updateChallenge(idx, 'min_trading_days', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="5"
-                              />
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Profit Target</label>
-                              <input
-                                value={challenge.profit_target}
-                                onChange={(e) => updateChallenge(idx, 'profit_target', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="10%"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Daily Drawdown</label>
-                              <input
-                                value={challenge.daily_drawdown}
-                                onChange={(e) => updateChallenge(idx, 'daily_drawdown', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="5%"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] uppercase text-brand-muted font-bold">Max Drawdown</label>
-                              <input
-                                value={challenge.max_drawdown}
-                                onChange={(e) => updateChallenge(idx, 'max_drawdown', e.target.value)}
-                                className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
-                                placeholder="10%"
-                              />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Profit Target</label>
+                                <input
+                                  value={challenge.profit_target}
+                                  onChange={(e) => updateChallenge(idx, 'profit_target', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="10%"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Daily Drawdown</label>
+                                <input
+                                  value={challenge.daily_drawdown}
+                                  onChange={(e) => updateChallenge(idx, 'daily_drawdown', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="5%"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-brand-muted font-bold">Max Drawdown</label>
+                                <input
+                                  value={challenge.max_drawdown}
+                                  onChange={(e) => updateChallenge(idx, 'max_drawdown', e.target.value)}
+                                  className="w-full bg-surface-dark border border-brand-border rounded px-2 py-1.5 text-sm text-white focus:border-brand-gold"
+                                  placeholder="10%"
+                                />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Footer Content */}
