@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Award, ChevronRight, ChevronLeft, Users, Zap, CheckCircle2, ArrowRight, LineChart, Bookmark, Star, Cpu, Terminal, ChevronDown, HelpCircle, Sparkles, ShieldCheck, BarChart3, GraduationCap, X, Globe } from 'lucide-react';
+import { TrendingUp, Shield, Award, ChevronRight, ChevronLeft, Users, Zap, CheckCircle2, ArrowRight, LineChart, Bookmark, Star, Cpu, Terminal, ChevronDown, HelpCircle, Sparkles, ShieldCheck, BarChart3, GraduationCap, X, Globe, Flame, Trophy, Gift, Copy } from 'lucide-react';
 import FirmCard from '../components/FirmCard';
 import { supabase } from '../lib/supabaseClient';
 import { PropFirm } from '../types';
@@ -215,36 +215,31 @@ const LandingPage: React.FC = () => {
             {/* Exclusive Offers Card (colspan 7) */}
             <div className="lg:col-span-7 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 relative overflow-hidden group shadow-xl">
                <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/5 to-transparent pointer-events-none"></div>
+               
                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
-                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                     <Zap size={16} className="text-orange-500" />
-                   </div>
-                   <h3 className="text-white font-bold text-lg">Exclusive March Forex Offers</h3>
+                 <div className="w-full flex-1 flex justify-center items-center">
+                   <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                     Exclusive March Forex Offers <Flame size={18} className="text-[#f93a74] drop-shadow-[0_0_8px_rgba(249,58,116,0.6)]" />
+                   </h3>
                  </div>
-                 <div className="flex gap-1.5 self-end sm:self-auto">
+                 <div className="flex gap-1.5 self-end sm:self-auto shrink-0 absolute right-0">
                    <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronLeft size={14}/></div>
-                   {/* pagination dots */}
-                   <div className="flex items-center gap-1.5 mx-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(246,174,19,0.8)]"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
-                   </div>
                    <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronRight size={14}/></div>
                  </div>
                </div>
 
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 relative z-10">
                  {[ 
                    { name: 'Blueberry Funded', discount: '35% OFF', rating: '3.8', icon: 'https://blueberryfunded.com/wp-content/themes/blueberryfunded-xmas/assets/img/logo.svg' },
                    { name: 'Alpha Capital', discount: '15% OFF', rating: '4.4', icon: 'https://alphacapitalgroup.uk/static/media/companyLogoInitials.879d8bbc8b528b1fd27761f4e43c34a0.svg' },
-                   { name: 'Goat Funded', discount: '15% OFF', rating: '4.5', icon: 'https://cdn.prod.website-files.com/67b3682cc0f1f956e16efe80/67b3682cc0f1f956e16efe99_Logo%20(76).avif' },
-                   { name: 'FundedNext', discount: '7% OFF', rating: '4.4', icon: 'https://fundednext.com/_next/image?url=https%3A%2F%2Fdirslur24ie1a.cloudfront.net%2Ffundednext%2FFundednext%20logo_White%20(1).png&w=384&q=75' }
+                   { name: 'The5ers', discount: '5% OFF', rating: '4.8', icon: 'https://the5ers.com/wp-content/uploads/2021/08/The5ers-Logo.png' },
+                   { name: 'BrightFunded', discount: '15% OFF', rating: '4.5', icon: 'https://app.brightfunded.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo_brightfunded_mark.881aade2.png&w=96&q=75' },
+                   { name: 'FundedNext', discount: '7% OFF', rating: '4.4', icon: 'https://fundednext.com/_next/image?url=https%3A%2F%2Fdirslur24ie1a.cloudfront.net%2Ffundednext%2FFundednext%20logo_White%20(1).png&w=384&q=75' },
+                   { name: 'ThinkCapital', discount: '20% OFF', rating: '4.2', icon: 'https://trader.thinkcapital.com/assets/images/think-capital-logo.svg' }
                  ].map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
                      <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
+                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 relative">
                           <img src={firm.icon} alt={firm.name} className="w-full h-full object-contain" />
                        </div>
                        <div className="text-left">
@@ -258,9 +253,9 @@ const LandingPage: React.FC = () => {
                          </div>
                        </div>
                      </div>
-                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="bg-brand-gold text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-[0_2px_10px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">{firm.discount}</span>
-                        <span className="text-[8px] font-bold text-brand-gold border border-brand-gold/30 rounded px-1 flex items-center gap-0.5 tracking-wider">MATCH <Sparkles size={8} className="shrink-0"/></span>
+                     <div className="flex flex-col items-end gap-1.5 shrink-0 pl-1">
+                        <span className="border border-white/10 text-white/90 text-[10px] font-bold px-2 py-[3px] rounded flex items-center gap-1 whitespace-nowrap bg-white/5">{firm.discount} <Gift size={10} className="text-brand-gold"/></span>
+                        <span className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[10px] font-black px-2 py-[3px] rounded flex items-center gap-1 shadow-[0_2px_8px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">SPOT <Copy size={10} className="stroke-[2.5]"/></span>
                      </div>
                    </div>
                  ))}
@@ -270,20 +265,22 @@ const LandingPage: React.FC = () => {
             {/* Popular Prop Firms (colspan 5) */}
             <div className="lg:col-span-5 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 flex flex-col h-full shadow-xl relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-bl from-brand-gold/5 to-transparent pointer-events-none"></div>
-               <div className="flex items-center gap-3 mb-6 relative z-10">
-                 <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
-                   <Award size={16} className="text-yellow-500" />
-                 </div>
-                 <h3 className="text-white font-bold text-lg">Most Popular Prop Firms</h3>
+               <div className="flex items-center justify-center mb-6 relative z-10 w-full">
+                 <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                   Most Popular Futures Prop Firms <Trophy size={16} className="text-[#f65c13] drop-shadow-[0_0_8px_rgba(246,92,19,0.6)]" />
+                 </h3>
                </div>
                
                <div className="flex-1 flex flex-col justify-between space-y-3 relative z-10 w-full">
                  {/* Map dynamic showcase firms! Use length to ensure 3 spots */}
                  {showcaseFirms.map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
-                     <div className="flex items-center gap-3 md:gap-4 shrink">
-                       <div className="w-6 h-6 shrink-0 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-black text-neutral-400 group-hover:bg-brand-gold group-hover:text-black transition-colors">
-                         #{i + 1}
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
+                     <div className="flex items-center gap-3 shrink">
+                       <div className="w-8 flex items-center justify-center shrink-0">
+                         {i === 0 ? <Trophy size={20} className="text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> :
+                          i === 1 ? <Trophy size={20} className="text-[#cbd5e1] drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]" /> :
+                          i === 2 ? <Trophy size={20} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
+                          <span className="text-neutral-500 font-black text-xs">#{i + 1}</span>}
                        </div>
                        <div className="w-10 h-10 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
                           {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-xs">{firm.name.charAt(0)}</span>}
@@ -299,8 +296,8 @@ const LandingPage: React.FC = () => {
                        </div>
                      </div>
                      <div className="flex flex-col items-end gap-1.5 shrink-0 pl-1">
-                        <span className="bg-brand-gold text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-[0_2px_10px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">10% OFF</span>
-                        <span className="text-[8px] font-bold text-brand-gold border border-brand-gold/30 rounded px-1 flex items-center gap-0.5 tracking-wider uppercase">Match <Sparkles size={8} className="shrink-0"/></span>
+                        <span className="border border-white/10 text-white/90 text-[10px] font-bold px-2 py-[3px] rounded flex items-center gap-1 whitespace-nowrap bg-white/5">10% OFF <Gift size={10} className="text-brand-gold"/></span>
+                        <span className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[10px] font-black px-2 py-[3px] rounded flex items-center gap-1 shadow-[0_2px_8px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">SPOT <Copy size={10} className="stroke-[2.5]"/></span>
                      </div>
                    </div>
                  ))}
