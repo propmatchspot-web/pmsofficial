@@ -53,11 +53,6 @@ interface Firm {
   payout_percentage?: number;
   last_30_days_payouts?: string;
   payout_growth?: string;
-  // New properties
-  one_step_allowed?: boolean;
-  two_step_allowed?: boolean;
-  three_step_allowed?: boolean;
-  show_in_hero?: boolean;
 }
 
 const AdminFirmsPage: React.FC = () => {
@@ -215,9 +210,6 @@ const AdminFirmsPage: React.FC = () => {
       scaling_plan: formData.get('scaling_plan') === 'on',
       scaling_plan_details: formData.get('scaling_plan_details') as string || '',
       discount_code: formData.get('discount_code') as string || '',
-      one_step_allowed: formData.get('one_step_allowed') === 'on',
-      two_step_allowed: formData.get('two_step_allowed') === 'on',
-      three_step_allowed: formData.get('three_step_allowed') === 'on',
       show_in_hero: formData.get('show_in_hero') === 'on',
       // Payout Stats
       avg_payout_time: formData.get('avg_payout_time') as string || '12 Hours',

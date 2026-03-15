@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Award, ChevronRight, Users, Zap, CheckCircle2, ArrowRight, LineChart, Bookmark, Star, Cpu, Terminal, ChevronDown, HelpCircle, Sparkles, ShieldCheck, BarChart3, GraduationCap } from 'lucide-react';
+import { TrendingUp, Shield, Award, ChevronRight, ChevronLeft, Users, Zap, CheckCircle2, ArrowRight, LineChart, Bookmark, Star, Cpu, Terminal, ChevronDown, HelpCircle, Sparkles, ShieldCheck, BarChart3, GraduationCap, X, Globe } from 'lucide-react';
 import FirmCard from '../components/FirmCard';
 import { supabase } from '../lib/supabaseClient';
 import { PropFirm } from '../types';
@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
   const [activeFirm, setActiveFirm] = useState(0);
 
   // Dynamically derive showcase firms from topFirms (first 3)
-  const showcaseFirms = topFirms.length > 0 
+  const showcaseFirms = topFirms.length > 0
     ? topFirms.slice(0, 3).map((firm, i) => ({
         name: firm.name,
         rating: firm.rating,
@@ -84,8 +84,8 @@ const LandingPage: React.FC = () => {
       const { data, error } = await supabase
         .from('firms')
         .select('*')
-        .order('show_in_hero', { ascending: false, nullsFirst: false }) // Toggled ON first
-        .order('rating', { ascending: false }) // Then highest rated
+        .order('show_in_hero', { ascending: false, nullsFirst: false })
+        .order('rating', { ascending: false })
         .limit(12);
 
       if (error) throw error;
@@ -154,284 +154,168 @@ const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-black overflow-x-hidden">
 
-      {/* --- PREMIUM HERO SECTION (Original Design) --- */}
-      <section className="relative pt-20 pb-0 lg:pt-24 overflow-hidden min-h-screen flex flex-col justify-center">
-
-        {/* Inline styles for hero */}
-        <style>{`
-          .text-gradient-gold {
-            background: linear-gradient(to right, #f6ae13, #fde68a, #f6ae13);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: textShimmer 3s linear infinite;
-          }
-          .hero-card {
-            background: rgba(24, 22, 17, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(246, 174, 19, 0.15);
-            border-radius: 20px;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px -10px rgba(246, 174, 19, 0.15);
-          }
-          .hero-card-secondary {
-            background: rgba(34, 28, 16, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-          }
-          @keyframes float-main { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-14px) rotate(-2deg); } }
-          @keyframes float-side-1 { 0%, 100% { transform: translateY(0) rotate(3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
-          @keyframes float-side-2 { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-8px) rotate(-4deg); } }
-          .comparison-bar {
-            background: linear-gradient(90deg, #f6ae13, #fbbf24);
-            border-radius: 6px;
-            height: 6px;
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-        `}</style>
-
-        {/* 1. DYNAMIC BACKGROUND LAYERS */}
+      {/* --- PREMIUM HERO SECTION (Rebuilt Bottom Cards Design) --- */}
+      <section className="relative pt-24 pb-12 lg:pt-32 overflow-hidden min-h-[90vh] flex flex-col justify-start">
+        {/* Background Layers */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 bg-black" />
-          <div className="absolute inset-x-0 bottom-0 h-[80vh] perspective-1000 opacity-40">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:50px_50px] rotate-x-60 origin-bottom animate-grid-flow" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent" />
-          </div>
-          <div className="absolute top-1/2 left-1/3 w-[1000px] h-[600px] bg-brand-gold/15 rounded-[100%] blur-[120px] animate-aurora mix-blend-screen" />
-          <div className="absolute top-[35%] left-[55%] w-[700px] h-[500px] bg-yellow-500/8 rounded-[100%] blur-[100px] animate-pulse-slow mix-blend-screen" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent"></div>
+          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-brand-gold/10 rounded-[100%] blur-[120px] mix-blend-screen pointer-events-none" />
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 contrast-150 mix-blend-overlay" />
         </div>
 
-        {/* 2. HERO CONTENT â€” SPLIT LAYOUT */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full pt-4 mt-4 md:mt-6 mb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full text-center mt-6 lg:mt-10">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight mb-6 leading-[1.1] animate-fade-in-up">
+            <span className="text-white block">Compare the Best </span>
+            <span className="text-brand-gold font-extrabold tracking-tighter" style={{ textShadow: '0 4px 30px rgba(246,174,19,0.3)' }}>Prop Trading Firms of</span><br/>
+            <span className="text-white font-black">2026</span>
+          </h1>
 
-            {/* LEFT COLUMN */}
-            <div className="lg:col-span-7 text-left">
-              <div className="inline-flex items-center gap-3 bg-white/[0.03] border border-brand-gold/20 rounded-full pl-3 pr-5 py-2 mb-8 backdrop-blur-xl shadow-[0_0_25px_-5px_rgba(246,174,19,0.2)] hover:border-brand-gold/50 transition-all cursor-default animate-fade-in-up">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-gold opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-gold"></span>
-                </span>
-                <span className="text-xs font-semibold text-brand-gold uppercase tracking-wider">Trusted by 10,000+ Traders</span>
+          <p className="max-w-2xl mx-auto text-base md:text-lg lg:text-xl text-neutral-400 mb-10 leading-relaxed font-light animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Trusted platform to compare prop trading firms using verified data and insights,<br className="hidden md:block"/>including reviews, rules, and rankings.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-16 px-2 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            {[
+              { icon: Shield, text: '50+ Verified Top Prop Firms' },
+              { icon: BarChart3, text: '1000+ Challenges' },
+              { icon: Users, text: '9000+ Real Trader Reviews' },
+              { icon: Globe, text: '4M+ Monthly Website Views' }
+            ].map((stat, i) => (
+              <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-white/10 hover:border-brand-gold/30 transition-colors">
+                <stat.icon size={14} className="text-brand-gold shrink-0" />
+                <span className="text-[10px] sm:text-xs font-semibold text-neutral-300 whitespace-nowrap">{stat.text}</span>
               </div>
+            ))}
+          </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[76px] font-black tracking-tighter mb-6 leading-[1.05] animate-fade-in-up">
-                <span className="text-white block mb-1">Find the Best</span>
-                <span className="text-gradient-gold inline-block pb-1">Prop Firms.</span><br className="hidden md:block" />
-                <span className="text-white">Get Funded Faster.</span>
-              </h1>
-
-              <p className="max-w-xl text-lg md:text-xl text-neutral-400 mb-10 leading-relaxed font-light animate-fade-in-up">
-                The institutional-grade platform for funded traders. Compare 85+ firms side-by-side, analyze rules, and unlock exclusive discounts &mdash; all in one place.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center gap-5 animate-fade-in-up">
-                <Link to="/firms">
-                  <button className="group relative w-full sm:w-auto min-w-[240px] px-8 py-4 bg-brand-gold text-black font-bold text-lg tracking-wide rounded-xl overflow-hidden shadow-button-glow hover:shadow-[0_0_60px_-5px_rgba(247,174,17,0.7)] hover:scale-105 transition-all duration-300">
-                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-shine group-hover:animate-none group-hover:translate-x-full transition-transform duration-1000" />
-                    <span className="relative flex items-center justify-center gap-2">
-                      Start Comparing <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </button>
-                </Link>
-                <Link to="/offers">
-                  <button className="group relative w-full sm:w-auto min-w-[240px] px-8 py-4 bg-white/5 backdrop-blur-xl border border-white/10 text-white font-medium text-lg tracking-wide rounded-xl overflow-hidden hover:bg-white/10 hover:border-brand-gold/50 transition-all duration-300">
-                    <div className="absolute inset-0 bg-brand-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <span className="relative flex items-center justify-center gap-2">
-                      <Zap size={20} className="text-brand-gold group-hover:scale-110 transition-transform" />
-                      View Exclusive Offers
-                    </span>
-                  </button>
-                </Link>
-              </div>
-
-              <div className="mt-10 flex items-center gap-5 pt-8 border-t border-white/10 animate-fade-in-up">
-                <div className="flex -space-x-3">
-                  {['bg-brand-gold', 'bg-amber-600', 'bg-yellow-700'].map((bg, i) => (
-                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-brand-black ${bg} flex items-center justify-center text-black font-bold text-sm shadow-lg`} style={{ zIndex: 30 - i * 10 }}>
-                      {['JT', 'MK', 'AS'][i]}
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-0.5 mb-0.5">
-                    {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-3.5 h-3.5 text-brand-gold fill-brand-gold" />)}
-                  </div>
-                  <span className="text-neutral-400 text-sm font-medium">10,000+ traders funded</span>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: Unique Stacked Dashboard Cards */}
-            <div className="lg:col-span-5 relative w-full hidden lg:flex items-center justify-center h-[580px]">
-
-              {/* MAIN CARD: Cycling Firm Spotlight */}
-              <div className="hero-card w-[92%] p-0 relative z-30" style={{ animation: 'float-main 7s ease-in-out infinite' }}>
-                <div className="px-5 pt-5 pb-3 border-b border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></div>
-                    <span className="text-[10px] font-bold text-brand-gold uppercase tracking-widest">Live Firm Spotlight</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {showcaseFirms.map((_, i) => (
-                      <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === activeFirm ? 'bg-brand-gold w-4' : 'bg-white/20 w-1.5'}`}></div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-5 relative overflow-hidden" style={{ minHeight: '210px' }}>
-                  {showcaseFirms.map((firm, idx) => (
-                    <div
-                      key={idx}
-                      className={`transition-all duration-700 ease-in-out ${idx === activeFirm ? 'opacity-100 translate-y-0 relative' : 'opacity-0 translate-y-6 absolute inset-x-5 top-5 pointer-events-none'}`}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden p-1">
-                            <img src={firm.logo} alt={firm.name} className="w-8 h-8 object-contain" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-bold text-lg leading-tight">{firm.name}</h4>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= Math.floor(firm.rating) ? 'text-brand-gold fill-brand-gold' : 'text-neutral-700'}`} />)}
-                              <span className="text-neutral-500 text-xs ml-1">{firm.rating}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider bg-brand-gold/15 text-brand-gold px-2.5 py-1 rounded-full border border-brand-gold/20 whitespace-nowrap">{firm.tag}</span>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2.5">
-                        {[
-                          { label: 'Profit Split', val: firm.profit },
-                          { label: 'Max Funding', val: firm.maxFunding },
-                          { label: 'Drawdown', val: firm.drawdown },
-                        ].map((stat, si) => (
-                          <div key={si} className="bg-white/[0.03] rounded-lg p-2.5 border border-white/5">
-                            <p className="text-[8px] text-neutral-500 uppercase tracking-wider font-semibold mb-0.5">{stat.label}</p>
-                            <p className="text-white font-bold text-sm">{stat.val}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-3.5 space-y-2">
-                        <div>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-[8px] text-neutral-500 uppercase font-semibold">Trust Score</span>
-                            <span className="text-[10px] text-brand-gold font-bold">{(firm.rating * 20).toFixed(0)}%</span>
-                          </div>
-                          <div className="w-full bg-white/5 rounded-full h-[5px]">
-                            <div className="comparison-bar" style={{ width: `${firm.rating * 20}%` }}></div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-[8px] text-neutral-500 uppercase font-semibold">Payout Speed</span>
-                            <span className="text-[10px] text-brand-gold font-bold">{85 + idx * 5}%</span>
-                          </div>
-                          <div className="w-full bg-white/5 rounded-full h-[5px]">
-                            <div className="comparison-bar" style={{ width: `${85 + idx * 5}%` }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* FLOATING CARD: Verified Payouts Feed */}
-              <div className="hero-card-secondary absolute -left-8 bottom-[8%] z-40 w-[220px] p-0 overflow-hidden" style={{ animation: 'float-side-1 8s ease-in-out infinite' }}>
-                <div className="px-3.5 py-2.5 border-b border-white/5 flex items-center gap-2">
-                  <Shield className="w-3.5 h-3.5 text-green-400" />
-                  <span className="text-[9px] font-bold text-green-400 uppercase tracking-widest">Verified Payouts</span>
-                </div>
-                <div className="p-3 space-y-2">
-                  {payoutFeed.slice(0, 3).map((p, i) => (
-                    <div key={i} className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-6 h-6 rounded-full bg-brand-gold/10 flex items-center justify-center text-[8px] font-bold text-brand-gold border border-brand-gold/20 flex-shrink-0">{p.trader}</div>
-                        <div className="min-w-0">
-                          <p className="text-white text-xs font-bold truncate">{p.amount}</p>
-                          <p className="text-neutral-600 text-[9px] truncate">{p.firm}</p>
-                        </div>
-                      </div>
-                      <span className="text-[8px] text-neutral-600 flex-shrink-0">{p.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* FLOATING CARD: Quick Stats */}
-              <div className="hero-card-secondary absolute -right-4 top-[5%] z-40 w-[180px] p-4" style={{ animation: 'float-side-2 9s ease-in-out infinite' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-brand-gold" />
+          {/* BOTTOM CARDS CONTAINER */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in-up relative mx-auto max-w-5xl" style={{ animationDelay: '0.2s' }}>
+            
+            {/* Notification Toast (Absolute positioned on left) */}
+            <div className="absolute -left-10 lg:-left-20 xl:-left-40 top-16 z-30 hidden xl:block pointer-events-none">
+               {/* "Top Performers" */}
+               <div className="mb-2 w-max bg-black/80 border border-brand-gold/30 rounded-full px-4 py-1.5 flex items-center gap-2 backdrop-blur-md shadow-lg pointer-events-auto">
+                 <Star size={14} className="text-brand-gold fill-brand-gold" />
+                 <span className="text-xs font-bold text-brand-gold tracking-wider uppercase">Top Performers</span>
+               </div>
+               <div className="bg-[#0f0e0c]/95 backdrop-blur-xl border border-brand-gold/30 rounded-2xl p-4 w-72 shadow-[0_15px_40px_-5px_rgba(246,174,19,0.25)] flex items-start gap-4 relative pointer-events-auto transition-transform hover:-translate-y-1 duration-300">
+                  <div className="w-12 h-12 bg-[#0c0a1a] rounded-xl flex items-center justify-center flex-shrink-0 border border-white/10 p-1">
+                    <img src="https://atsfunded.com/ats-logo.png" alt="ATS Funded" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <p className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Total Saved</p>
-                    <p className="text-white font-bold text-lg leading-none">$2.4M+</p>
+                    <p className="text-white text-sm leading-tight text-left">
+                      A trader just received a <span className="text-green-400 font-bold">$104</span> payout from <span className="font-bold">ATS FUNDED</span> with a <span className="text-brand-gold font-bold">$100,000</span> account!
+                    </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 bg-green-500/10 rounded-lg px-2.5 py-1.5 border border-green-500/15">
-                  <CheckCircle2 className="w-3 h-3 text-green-400" />
-                  <span className="text-green-400 text-[10px] font-semibold">+18% this month</span>
-                </div>
-              </div>
+                  <button className="text-neutral-500 absolute top-2 right-2 hover:text-white transition-colors"><X size={14}/></button>
+               </div>
+            </div>
 
-              {/* Background glow orbs */}
-              <div className="absolute top-[10%] right-0 w-40 h-40 rounded-full bg-brand-gold/10 blur-[60px] pointer-events-none"></div>
-              <div className="absolute bottom-[15%] left-0 w-48 h-48 rounded-full bg-yellow-500/8 blur-[80px] pointer-events-none"></div>
+            {/* Exclusive Offers Card (colspan 7) */}
+            <div className="lg:col-span-7 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 relative overflow-hidden group shadow-xl">
+               <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/5 to-transparent pointer-events-none"></div>
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                     <Zap size={16} className="text-orange-500" />
+                   </div>
+                   <h3 className="text-white font-bold text-lg">Exclusive March Forex Offers</h3>
+                 </div>
+                 <div className="flex gap-1.5 self-end sm:self-auto">
+                   <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronLeft size={14}/></div>
+                   {/* pagination dots */}
+                   <div className="flex items-center gap-1.5 mx-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(246,174,19,0.8)]"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-700"></div>
+                   </div>
+                   <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronRight size={14}/></div>
+                 </div>
+               </div>
+
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                 {[ 
+                   { name: 'Blueberry Funded', discount: '35% OFF', rating: '3.8', icon: 'https://blueberryfunded.com/wp-content/themes/blueberryfunded-xmas/assets/img/logo.svg' },
+                   { name: 'Alpha Capital', discount: '15% OFF', rating: '4.4', icon: 'https://alphacapitalgroup.uk/static/media/companyLogoInitials.879d8bbc8b528b1fd27761f4e43c34a0.svg' },
+                   { name: 'Goat Funded', discount: '15% OFF', rating: '4.5', icon: 'https://cdn.prod.website-files.com/67b3682cc0f1f956e16efe80/67b3682cc0f1f956e16efe99_Logo%20(76).avif' },
+                   { name: 'FundedNext', discount: '7% OFF', rating: '4.4', icon: 'https://fundednext.com/_next/image?url=https%3A%2F%2Fdirslur24ie1a.cloudfront.net%2Ffundednext%2FFundednext%20logo_White%20(1).png&w=384&q=75' }
+                 ].map((firm, i) => (
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
+                     <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
+                          <img src={firm.icon} alt={firm.name} className="w-full h-full object-contain" />
+                       </div>
+                       <div className="text-left">
+                         <h4 className="text-white text-[13px] font-bold tracking-tight">{firm.name}</h4>
+                         <div className="flex items-center gap-1 mt-0.5">
+                           <span className="text-brand-gold text-xs font-bold">{firm.rating}</span>
+                           <div className="flex gap-[1px]">
+                             {[1,2,3,4].map(s=><Star key={s} size={8} className="text-brand-gold fill-brand-gold"/>)}
+                             <Star size={8} className="text-neutral-600 fill-neutral-600"/>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <span className="bg-brand-gold text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-[0_2px_10px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">{firm.discount}</span>
+                        <span className="text-[8px] font-bold text-brand-gold border border-brand-gold/30 rounded px-1 flex items-center gap-0.5 tracking-wider">MATCH <Sparkles size={8} className="shrink-0"/></span>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+
+            {/* Popular Prop Firms (colspan 5) */}
+            <div className="lg:col-span-5 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 flex flex-col h-full shadow-xl relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-bl from-brand-gold/5 to-transparent pointer-events-none"></div>
+               <div className="flex items-center gap-3 mb-6 relative z-10">
+                 <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                   <Award size={16} className="text-yellow-500" />
+                 </div>
+                 <h3 className="text-white font-bold text-lg">Most Popular Prop Firms</h3>
+               </div>
+               
+               <div className="flex-1 flex flex-col justify-between space-y-3 relative z-10 w-full">
+                 {/* Map dynamic showcase firms! Use length to ensure 3 spots */}
+                 {showcaseFirms.map((firm, i) => (
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
+                     <div className="flex items-center gap-3 md:gap-4 shrink">
+                       <div className="w-6 h-6 shrink-0 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-black text-neutral-400 group-hover:bg-brand-gold group-hover:text-black transition-colors">
+                         #{i + 1}
+                       </div>
+                       <div className="w-10 h-10 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
+                          {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-xs">{firm.name.charAt(0)}</span>}
+                       </div>
+                       <div className="text-left min-w-0">
+                         <h4 className="text-white text-[13px] font-bold tracking-tight truncate pr-2">{firm.name}</h4>
+                         <div className="flex items-center gap-1 mt-0.5">
+                           <span className="text-brand-gold text-xs font-bold">{firm.rating.toFixed(1)}</span>
+                           <div className="flex gap-[1px]">
+                             {[1,2,3,4,5].map(s=><Star key={s} size={8} className={s <= Math.floor(firm.rating) ? "text-brand-gold fill-brand-gold" : "text-neutral-700 fill-neutral-700"}/>)}
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div className="flex flex-col items-end gap-1.5 shrink-0 pl-1">
+                        <span className="bg-brand-gold text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-[0_2px_10px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">10% OFF</span>
+                        <span className="text-[8px] font-bold text-brand-gold border border-brand-gold/30 rounded px-1 flex items-center gap-0.5 tracking-wider uppercase">Match <Sparkles size={8} className="shrink-0"/></span>
+                     </div>
+                   </div>
+                 ))}
+               </div>
             </div>
 
           </div>
-        </div>
-
-        {/* 3. INFINITE LOGO TICKER STRIP - HIDDEN */}
-        {/*
-        <div className="w-full border-y border-white/5 bg-black/80 backdrop-blur-md relative z-30 mt-auto">
-          <div className="overflow-hidden py-8 flex select-none">
-            <div className="flex whitespace-nowrap animate-marquee items-center min-w-full">
-              {tickerFirms.map((firm, i) => (
-                <div key={i} className="flex-shrink-0 flex items-center justify-center mx-12">
-                  <img
-                    src={firm.logo}
-                    alt={firm.name}
-                    className="h-12 md:h-16 w-auto object-contain max-w-[200px]"
-                    style={{ opacity: 1, filter: 'none' }}
-                  />
-                </div>
-              ))}
-            </div>
+          
+          <div className="w-full max-w-5xl mx-auto flex justify-end mt-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+             <Link to="/firms">
+                <button className="text-neutral-400 hover:text-white flex items-center gap-2 text-sm font-semibold transition-colors border border-white/5 bg-white/5 rounded-full px-5 py-2 hover:bg-white/10 hover:border-white/10 shadow-lg">
+                   View All Firms <ArrowRight size={14} />
+                </button>
+             </Link>
           </div>
-          <div className="absolute inset-y-0 left-0 w-20 md:w-60 bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
-          <div className="absolute inset-y-0 right-0 w-20 md:w-60 bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
-        </div>
-        */}
-
-        {/* Premium Feature Grid — Exact Plaza Style */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 md:mt-10 relative z-20 px-4 sm:px-6 lg:px-8">
-          {[
-            { icon: Zap, title: 'AI Matching', desc: 'Find your perfect firm in under 90 seconds with our proprietary AI algorithm.' },
-            { icon: ShieldCheck, title: 'Verified Reviews', desc: 'Trust scores based on verified payout proofs and community feedback.' },
-            { icon: TrendingUp, title: 'Real-time Data', desc: 'Live spreads, payout times, and rule changes updated daily.' },
-            { icon: GraduationCap, title: 'Trader Education', desc: 'Master the challenge with our specific prep courses and tools.' },
-          ].map((card, idx) => (
-            <div key={idx} className="group relative bg-black/40 backdrop-blur-xl border border-white/5 rounded-2xl p-7 hover:bg-[#0d0d0b] hover:border-emerald-500/40 transition-all duration-500 overflow-hidden hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]">
-              {/* Subtle gradient background on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-              <div className="relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all duration-300">
-                <card.icon className="w-7 h-7" />
-              </div>
-              <h3 className="relative z-10 font-bold text-xl text-white mb-3 group-hover:text-emerald-400 transition-colors duration-300">{card.title}</h3>
-              <p className="relative z-10 text-neutral-500 text-sm leading-relaxed group-hover:text-neutral-300 transition-colors duration-300">{card.desc}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -502,157 +386,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* --- SPOT REPLAY SPOTLIGHT SECTION --- */}
-      <section className="py-24 relative overflow-hidden bg-[#0c0b09] border-y border-white/[0.05]">
-        {/* Dynamic Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-gold/5 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[100px]"></div>
-          {/* Animated chart line background hint */}
-          <svg className="absolute w-full h-full opacity-[0.03]" preserveAspectRatio="none" viewBox="0 0 1000 300">
-            <path d="M0 250 Q250 150 500 200 T1000 50" fill="none" stroke="#f6ae13" strokeWidth="4" className="animate-pulse" />
-          </svg>
-        </div>
 
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-            {/* Left side: Content */}
-            <div>
-              <div className="inline-flex items-center gap-2 bg-brand-gold/10 border border-brand-gold/20 rounded-full px-4 py-1.5 mb-6 backdrop-blur-md">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-gold opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-gold"></span>
-                </span>
-                <span className="text-xs font-bold text-brand-gold uppercase tracking-widest">New Engine Released</span>
-              </div>
-
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-[1.1]">
-                Stop Guessing.<br />
-                <span className="text-gradient-gold">Start Backtesting.</span>
-              </h2>
-
-              <p className="text-neutral-400 text-lg md:text-xl leading-relaxed mb-8 max-w-xl font-light">
-                Introducing <strong className="text-white font-bold">Spot Replay</strong> — our institutional-grade
-                historical market simulator. Replay real order flow, practice your edge on authentic TradingView charts,
-                and master any prop firm challenge without risking a dime.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 mb-10 text-sm md:text-base">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-brand-gold">
-                    <LineChart className="w-4 h-4" />
-                  </div>
-                  <span className="text-white font-medium">True Tick Data</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-brand-gold">
-                    <Cpu className="w-4 h-4" />
-                  </div>
-                  <span className="text-white font-medium">Native TV Charts</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-brand-gold">
-                    <Terminal className="w-4 h-4" />
-                  </div>
-                  <span className="text-white font-medium">Deep Analytics</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-brand-gold">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <span className="text-white font-medium">Prop Sim Mode</span>
-                </div>
-              </div>
-
-              <a
-                href="https://replay.propmatchspot.com/signup"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex group relative px-8 py-4 bg-brand-gold text-black font-bold text-lg tracking-wide rounded-xl overflow-hidden shadow-[0_0_40px_-10px_rgba(246,174,19,0.5)] hover:shadow-[0_0_60px_-5px_rgba(247,174,17,0.7)] hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shine_5s_ease-in-out_infinite] group-hover:animate-none group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="relative flex items-center justify-center gap-2">
-                  Launch Spot Replay <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </span>
-              </a>
-            </div>
-
-            {/* Right side: Visual Interface Mockup */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_-10px_rgba(246,174,19,0.2)] border border-white/10 group cursor-pointer" style={{ transform: 'perspective(1000px) rotateY(-5deg) rotateX(5deg)' }}>
-              <a href="https://replay.propmatchspot.com" target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                {/* Interface Header Fake */}
-                <div className="absolute top-0 inset-x-0 h-12 bg-[#131722] border-b border-white/10 flex items-center px-4 justify-between z-20">
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                    </div>
-                    <img src="/Replaylogo.png" alt="Spot Replay" className="h-5 opacity-90 ml-2" />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="h-6 w-24 bg-brand-gold/20 rounded border border-brand-gold/30"></div>
-                    <div className="h-6 w-8 bg-white/10 rounded"></div>
-                  </div>
-                </div>
-
-                {/* Interface Body Fake (TradingView mockup) */}
-                <div className="absolute inset-x-0 top-12 bottom-12 bg-[#0c0d12] relative overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5"></div>
-                  {/* Fake candlestick chart */}
-                  <svg viewBox="0 0 100 100" className="w-[110%] h-[110%] opacity-80" preserveAspectRatio="none">
-                    <line x1="10" y1="80" x2="10" y2="20" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="9" y="40" width="2" height="30" fill="#089981" />
-                    <line x1="20" y1="40" x2="20" y2="10" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="19" y="15" width="2" height="20" fill="#089981" />
-                    <line x1="30" y1="50" x2="30" y2="15" stroke="#F23645" strokeWidth="0.5" />
-                    <rect x="29" y="25" width="2" height="20" fill="#F23645" />
-                    <line x1="40" y1="80" x2="40" y2="30" stroke="#F23645" strokeWidth="0.5" />
-                    <rect x="39" y="45" width="2" height="35" fill="#F23645" />
-                    <line x1="50" y1="90" x2="50" y2="40" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="49" y="60" width="2" height="20" fill="#089981" />
-                    <line x1="60" y1="60" x2="60" y2="10" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="59" y="20" width="2" height="30" fill="#089981" />
-                    <line x1="70" y1="30" x2="70" y2="5" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="69" y="10" width="2" height="15" fill="#089981" />
-                    <line x1="80" y1="60" x2="80" y2="20" stroke="#F23645" strokeWidth="0.5" />
-                    <rect x="79" y="25" width="2" height="25" fill="#F23645" />
-                    <line x1="90" y1="40" x2="90" y2="15" stroke="#089981" strokeWidth="0.5" />
-                    <rect x="89" y="20" width="2" height="15" fill="#089981" />
-                    {/* Play cursor line */}
-                    <line x1="80" y1="0" x2="80" y2="100" stroke="#f6ae13" strokeWidth="0.5" strokeDasharray="1,1" />
-                    <circle cx="80" cy="25" r="1.5" fill="#f6ae13" className="animate-ping" />
-                  </svg>
-
-                  {/* Floating Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 backdrop-blur-[2px]">
-                    <div className="w-16 h-16 rounded-full bg-brand-gold text-black flex items-center justify-center shadow-[0_0_30px_rgba(246,174,19,0.5)] transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="ml-1">
-                        <path d="M5 3L19 12L5 21V3Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Interface Footer Fake */}
-                <div className="absolute bottom-0 inset-x-0 h-12 bg-[#131722] border-t border-white/10 flex items-center justify-between px-4 z-20">
-                  <div className="flex gap-2">
-                    <div className="w-16 h-6 bg-green-500/20 rounded border border-green-500/30"></div>
-                    <div className="w-16 h-6 bg-red-500/20 rounded border border-red-500/30"></div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="text-[10px] text-white/50"><span className="text-white/30 mr-1">TICK</span> 1m Data</div>
-                    <div className="text-[10px] font-bold text-green-400">+$1,450 PnL</div>
-                  </div>
-                </div>
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </section>
 
       {/* --- FEATURE BENTO GRID (PREMIUM V3) --- */}
       <section className="py-28 relative z-20 overflow-hidden">
