@@ -190,7 +190,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* BOTTOM CARDS CONTAINER */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in-up relative mx-auto max-w-5xl" style={{ animationDelay: '0.2s' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-5 animate-fade-in-up relative mx-auto w-full max-w-[1300px] px-2 sm:px-0" style={{ animationDelay: '0.2s' }}>
             
             {/* Notification Toast (Absolute positioned on left) */}
             <div className="absolute -left-10 lg:-left-20 xl:-left-40 top-16 z-30 hidden xl:block pointer-events-none">
@@ -212,8 +212,8 @@ const LandingPage: React.FC = () => {
                </div>
             </div>
 
-            {/* Exclusive Offers Card (colspan 7) */}
-            <div className="lg:col-span-7 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 relative overflow-hidden group shadow-xl">
+            {/* Exclusive Offers Card (colspan 8) */}
+            <div className="lg:col-span-8 xl:col-span-8 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-5 md:p-6 relative overflow-hidden group shadow-xl">
                <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/5 to-transparent pointer-events-none"></div>
                
                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
@@ -237,15 +237,15 @@ const LandingPage: React.FC = () => {
                    { name: 'FundedNext', discount: '7% OFF', rating: '4.4', icon: 'https://fundednext.com/_next/image?url=https%3A%2F%2Fdirslur24ie1a.cloudfront.net%2Ffundednext%2FFundednext%20logo_White%20(1).png&w=384&q=75' },
                    { name: 'ThinkCapital', discount: '20% OFF', rating: '4.2', icon: 'https://trader.thinkcapital.com/assets/images/think-capital-logo.svg' }
                  ].map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
-                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 relative">
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-2 pr-2.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
+                     <div className="flex items-center gap-2.5">
+                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 relative shrink-0">
                           <img src={firm.icon} alt={firm.name} className="w-full h-full object-contain" />
                        </div>
-                       <div className="text-left">
-                         <h4 className="text-white text-[13px] font-bold tracking-tight">{firm.name}</h4>
-                         <div className="flex items-center gap-1 mt-0.5">
-                           <span className="text-brand-gold text-xs font-bold">{firm.rating}</span>
+                       <div className="text-left min-w-0">
+                         <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate max-w-[100px] xl:max-w-none">{firm.name}</h4>
+                         <div className="flex items-center gap-1.5">
+                           <span className="text-brand-gold text-[11px] font-bold leading-none">{firm.rating}</span>
                            <div className="flex gap-[1px]">
                              {[1,2,3,4].map(s=><Star key={s} size={8} className="text-brand-gold fill-brand-gold"/>)}
                              <Star size={8} className="text-neutral-600 fill-neutral-600"/>
@@ -253,17 +253,23 @@ const LandingPage: React.FC = () => {
                          </div>
                        </div>
                      </div>
-                     <div className="flex flex-col items-end gap-1.5 shrink-0 pl-1">
-                        <span className="border border-white/10 text-white/90 text-[10px] font-bold px-2 py-[3px] rounded flex items-center gap-1 whitespace-nowrap bg-white/5">{firm.discount} <Gift size={10} className="text-brand-gold"/></span>
-                        <span className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[10px] font-black px-2 py-[3px] rounded flex items-center gap-1 shadow-[0_2px_8px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">SPOT <Copy size={10} className="stroke-[2.5]"/></span>
+                     <div className="flex flex-col gap-1.5 shrink-0 pl-1">
+                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2 py-1 rounded-full flex items-center justify-between gap-1.5 bg-white/5 w-[80px] whitespace-nowrap shadow-sm">
+                          <span>{firm.discount}</span>
+                          <Gift size={9} className="text-brand-gold shrink-0"/>
+                        </div>
+                        <div className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2 py-[3px] rounded-full flex items-center justify-between gap-1.5 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[80px] whitespace-nowrap">
+                          <span className="tracking-wide">SPOT</span>
+                          <Copy size={9} className="stroke-[2.5] shrink-0"/>
+                        </div>
                      </div>
                    </div>
                  ))}
                </div>
             </div>
 
-            {/* Popular Prop Firms (colspan 5) */}
-            <div className="lg:col-span-5 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-6 flex flex-col h-full shadow-xl relative overflow-hidden group">
+            {/* Popular Prop Firms (colspan 4) */}
+            <div className="lg:col-span-4 xl:col-span-4 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-5 md:p-6 flex flex-col h-full shadow-xl relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-bl from-brand-gold/5 to-transparent pointer-events-none"></div>
                <div className="flex items-center justify-center mb-6 relative z-10 w-full">
                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
@@ -274,30 +280,36 @@ const LandingPage: React.FC = () => {
                <div className="flex-1 flex flex-col justify-between space-y-3 relative z-10 w-full">
                  {/* Map dynamic showcase firms! Use length to ensure 3 spots */}
                  {showcaseFirms.map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
-                     <div className="flex items-center gap-3 shrink">
-                       <div className="w-8 flex items-center justify-center shrink-0">
-                         {i === 0 ? <Trophy size={20} className="text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> :
-                          i === 1 ? <Trophy size={20} className="text-[#cbd5e1] drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]" /> :
-                          i === 2 ? <Trophy size={20} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
+                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-2 pr-2.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
+                     <div className="flex items-center gap-2.5 shrink">
+                       <div className="w-7 flex items-center justify-center shrink-0">
+                         {i === 0 ? <Trophy size={18} className="text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> :
+                          i === 1 ? <Trophy size={18} className="text-[#cbd5e1] drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]" /> :
+                          i === 2 ? <Trophy size={18} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
                           <span className="text-neutral-500 font-black text-xs">#{i + 1}</span>}
                        </div>
                        <div className="w-10 h-10 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
-                          {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-xs">{firm.name.charAt(0)}</span>}
+                          {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-[10px]">{firm.name.charAt(0)}</span>}
                        </div>
-                       <div className="text-left min-w-0">
-                         <h4 className="text-white text-[13px] font-bold tracking-tight truncate pr-2">{firm.name}</h4>
-                         <div className="flex items-center gap-1 mt-0.5">
-                           <span className="text-brand-gold text-xs font-bold">{firm.rating.toFixed(1)}</span>
+                       <div className="text-left min-w-0 flex-1">
+                         <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate max-w-[90px] xl:max-w-[105px] pr-1">{firm.name}</h4>
+                         <div className="flex items-center gap-1.5">
+                           <span className="text-brand-gold text-[11px] font-bold leading-none">{firm.rating.toFixed(1)}</span>
                            <div className="flex gap-[1px]">
                              {[1,2,3,4,5].map(s=><Star key={s} size={8} className={s <= Math.floor(firm.rating) ? "text-brand-gold fill-brand-gold" : "text-neutral-700 fill-neutral-700"}/>)}
                            </div>
                          </div>
                        </div>
                      </div>
-                     <div className="flex flex-col items-end gap-1.5 shrink-0 pl-1">
-                        <span className="border border-white/10 text-white/90 text-[10px] font-bold px-2 py-[3px] rounded flex items-center gap-1 whitespace-nowrap bg-white/5">10% OFF <Gift size={10} className="text-brand-gold"/></span>
-                        <span className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[10px] font-black px-2 py-[3px] rounded flex items-center gap-1 shadow-[0_2px_8px_-2px_rgba(246,174,19,0.5)] whitespace-nowrap">SPOT <Copy size={10} className="stroke-[2.5]"/></span>
+                     <div className="flex flex-col gap-1.5 shrink-0 pl-1">
+                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2 py-1 rounded-full flex items-center justify-between gap-1.5 bg-white/5 w-[80px] whitespace-nowrap shadow-sm">
+                          <span>10% OFF</span>
+                          <Gift size={9} className="text-brand-gold shrink-0"/>
+                        </div>
+                        <div className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2 py-[3px] rounded-full flex items-center justify-between gap-1.5 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[80px] whitespace-nowrap">
+                          <span className="tracking-wide">SPOT</span>
+                          <Copy size={9} className="stroke-[2.5] shrink-0"/>
+                        </div>
                      </div>
                    </div>
                  ))}
@@ -306,7 +318,7 @@ const LandingPage: React.FC = () => {
 
           </div>
           
-          <div className="w-full max-w-5xl mx-auto flex justify-end mt-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="w-full max-w-[1300px] mx-auto flex justify-end mt-4 animate-fade-in-up px-2 sm:px-0" style={{ animationDelay: '0.3s' }}>
              <Link to="/firms">
                 <button className="text-neutral-400 hover:text-white flex items-center gap-2 text-sm font-semibold transition-colors border border-white/5 bg-white/5 rounded-full px-5 py-2 hover:bg-white/10 hover:border-white/10 shadow-lg">
                    View All Firms <ArrowRight size={14} />
