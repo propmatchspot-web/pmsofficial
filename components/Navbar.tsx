@@ -6,17 +6,8 @@ import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const navLinks = [
     { name: 'Browse Firms', path: '/firms' },
@@ -30,18 +21,15 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className={`fixed z-50 transition-all duration-500 ease-in-out ${scrolled
-      ? 'top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[90%] max-w-7xl bg-[#181611]/80 backdrop-blur-xl border border-brand-border/50 rounded-2xl py-2 shadow-glow'
-      : 'top-0 left-0 right-0 w-full bg-transparent py-6'
-      }`}>
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ${scrolled ? 'max-w-full' : 'max-w-7xl'}`}>
+    <nav className="fixed z-50 transition-all duration-500 ease-in-out top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[90%] max-w-7xl bg-[#181611]/80 backdrop-blur-xl border border-brand-border/50 rounded-2xl py-2 shadow-glow">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <img
               src="http://zainenterprisespakistan.com/wp-content/uploads/2025/12/Untitled-design-28-scaled.png"
               alt="Prop Match Spot"
-              className={`w-auto object-contain transition-all duration-300 ${scrolled ? 'h-12' : 'h-16'}`}
+              className="w-auto object-contain h-12"
             />
           </Link>
 

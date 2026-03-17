@@ -40,6 +40,10 @@ export interface PropFirm {
   challenges?: Challenge[];
   status?: 'active' | 'draft' | 'inactive';
   show_in_hero?: boolean; // Added for Hero showcase toggle feature
+  promoCode?: string; // Promo code for the firm (e.g., "SPOT")
+  discountValue?: number; // Discount percentage value
+  promo_code?: string; // DB field alias
+  discount_value?: number; // DB field alias
   // Trading Specs
   leverage?: string;
   newsTrading?: boolean;

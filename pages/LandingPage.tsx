@@ -26,6 +26,39 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 const LandingPage: React.FC = () => {
   const [topFirms, setTopFirms] = useState<PropFirm[]>([]);
   const [activeFirm, setActiveFirm] = useState(0);
+  const [offersPage, setOffersPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [copiedFirm, setCopiedFirm] = useState<{name: string; logo: string; rating: number; code: string; discount: string; website: string; affiliate: string} | null>(null);
+
+  // Detect mobile for pagination page size
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Copy promo code handler
+  const handleCopyCode = (firm: PropFirm) => {
+    const code = firm.promoCode || 'SPOT';
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedFirm({
+        name: firm.name,
+        logo: firm.logo,
+        rating: Number(firm.rating),
+        code,
+        discount: firm.discountValue ? `${firm.discountValue}% OFF` : 'Exclusive Deal',
+        website: firm.websiteUrl || '',
+        affiliate: firm.affiliateLink || firm.websiteUrl || ''
+      });
+      setTimeout(() => setCopiedFirm(null), 4000);
+    });
+  };
+
+  // Paginated firms for Exclusive Offers
+  const offersPerPage = isMobile ? 3 : 6;
+  const totalOffersPages = Math.ceil(topFirms.length / offersPerPage);
+  const paginatedOffers = topFirms.slice(offersPage * offersPerPage, (offersPage + 1) * offersPerPage);
 
   // Dynamically derive showcase firms from topFirms (first 3)
   const showcaseFirms = topFirms.length > 0
@@ -165,103 +198,154 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full text-center mt-6 lg:mt-10">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight mb-6 leading-[1.1] animate-fade-in-up">
-            <span className="text-white block">Compare the Best </span>
-            <span className="text-brand-gold font-extrabold tracking-tighter" style={{ textShadow: '0 4px 30px rgba(246,174,19,0.3)' }}>Prop Trading Firms of</span><br/>
-            <span className="text-white font-black">2026</span>
+          <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-[50px] xl:text-[62px] 2xl:text-[68px] font-black tracking-tight mb-4 leading-[1.1] animate-fade-in-up w-full flex flex-col lg:block">
+            <span className="text-white pb-1 lg:pb-0 lg:mr-3">Compare the Best</span>
+            <span className="pb-1 lg:pb-0 lg:mr-3 bg-gradient-to-r from-brand-gold via-[#ffd700] to-brand-gold bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_3s_linear_infinite]" style={{ filter: 'drop-shadow(0 4px 20px rgba(246,174,19,0.4))' }}>Prop Trading Firms</span>
+            <span className="text-white lg:ml-3">of 2026</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-base md:text-lg lg:text-xl text-neutral-400 mb-10 leading-relaxed font-light animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Trusted platform to compare prop trading firms using verified data and insights,<br className="hidden md:block"/>including reviews, rules, and rankings.
+          <p className="max-w-2xl lg:max-w-4xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl text-neutral-400 mb-10 leading-relaxed sm:leading-loose font-normal animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Trusted platform to compare prop trading firms using verified data and insights,<br className="hidden lg:block"/>
+            <span className="lg:hidden"> </span>including reviews, rules, and rankings.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-16 px-2 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            {[
-              { icon: Shield, text: '50+ Verified Top Prop Firms' },
-              { icon: BarChart3, text: '1000+ Challenges' },
-              { icon: Users, text: '9000+ Real Trader Reviews' },
-              { icon: Globe, text: '4M+ Monthly Website Views' }
-            ].map((stat, i) => (
-              <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-white/10 hover:border-brand-gold/30 transition-colors">
-                <stat.icon size={14} className="text-brand-gold shrink-0" />
-                <span className="text-[10px] sm:text-xs font-semibold text-neutral-300 whitespace-nowrap">{stat.text}</span>
-              </div>
-            ))}
-          </div>
+          {/* Feature Badges - Marquee on Mobile, Flex on Desktop */}
+          <div className="mb-16 animate-fade-in-up flex justify-center w-full" style={{ animationDelay: '0.1s' }}>
+            <style>{`
+              @keyframes scroll-badges {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .animate-scroll-badges {
+                animation: scroll-badges 15s linear infinite;
+              }
+            `}</style>
 
-          {/* BOTTOM CARDS CONTAINER */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-5 animate-fade-in-up relative mx-auto w-full max-w-[1300px] px-2 sm:px-0" style={{ animationDelay: '0.2s' }}>
-            
-            {/* Notification Toast (Absolute positioned on left) */}
-            <div className="absolute -left-10 lg:-left-20 xl:-left-40 top-16 z-30 hidden xl:block pointer-events-none">
-               {/* "Top Performers" */}
-               <div className="mb-2 w-max bg-black/80 border border-brand-gold/30 rounded-full px-4 py-1.5 flex items-center gap-2 backdrop-blur-md shadow-lg pointer-events-auto">
-                 <Star size={14} className="text-brand-gold fill-brand-gold" />
-                 <span className="text-xs font-bold text-brand-gold tracking-wider uppercase">Top Performers</span>
-               </div>
-               <div className="bg-[#0f0e0c]/95 backdrop-blur-xl border border-brand-gold/30 rounded-2xl p-4 w-72 shadow-[0_15px_40px_-5px_rgba(246,174,19,0.25)] flex items-start gap-4 relative pointer-events-auto transition-transform hover:-translate-y-1 duration-300">
-                  <div className="w-12 h-12 bg-[#0c0a1a] rounded-xl flex items-center justify-center flex-shrink-0 border border-white/10 p-1">
-                    <img src="https://atsfunded.com/ats-logo.png" alt="ATS Funded" className="w-full h-full object-contain" />
-                  </div>
-                  <div>
-                    <p className="text-white text-sm leading-tight text-left">
-                      A trader just received a <span className="text-green-400 font-bold">$104</span> payout from <span className="font-bold">ATS FUNDED</span> with a <span className="text-brand-gold font-bold">$100,000</span> account!
-                    </p>
-                  </div>
-                  <button className="text-neutral-500 absolute top-2 right-2 hover:text-white transition-colors"><X size={14}/></button>
-               </div>
+            {/* Desktop View (hidden on mobile) */}
+            <div className="hidden md:flex flex-wrap justify-center gap-4 px-2">
+              {[
+                { icon: Shield, text: '50+ Verified Top Prop Firms' },
+                { icon: BarChart3, text: '1000+ Challenges' },
+                { icon: Users, text: '9000+ Real Trader Reviews' },
+                { icon: Globe, text: '4M+ Monthly Website Views' }
+              ].map((stat, i) => (
+                <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-full px-4 py-2 hover:bg-white/10 hover:border-brand-gold/30 transition-colors">
+                  <stat.icon size={16} className="text-brand-gold shrink-0" />
+                  <span className="text-xs sm:text-sm font-semibold text-neutral-300 whitespace-nowrap">{stat.text}</span>
+                </div>
+              ))}
             </div>
 
+            {/* Mobile View (Marquee, hidden on desktop) */}
+            <div className="md:hidden relative w-screen -mx-4 flex overflow-x-hidden py-1">
+              <div className="flex animate-scroll-badges w-max">
+                {/* First set of badges */}
+                <div className="flex gap-3 px-3">
+                  {[
+                    { icon: Shield, text: '50+ Verified Top Prop Firms' },
+                    { icon: BarChart3, text: '1000+ Challenges' },
+                    { icon: Users, text: '9000+ Real Trader Reviews' },
+                    { icon: Globe, text: '4M+ Monthly Website Views' }
+                  ].map((stat, i) => (
+                    <div key={`m1-${i}`} className="flex items-center gap-2 bg-[#181611]/80 border border-white/5 rounded-full px-3 py-1.5 shrink-0">
+                      <stat.icon size={14} className="text-brand-gold shrink-0" />
+                      <span className="text-[11px] font-semibold text-neutral-300 whitespace-nowrap">{stat.text}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Second set of badges (for seamless loop) */}
+                <div className="flex gap-3 px-3" aria-hidden="true">
+                  {[
+                    { icon: Shield, text: '50+ Verified Top Prop Firms' },
+                    { icon: BarChart3, text: '1000+ Challenges' },
+                    { icon: Users, text: '9000+ Real Trader Reviews' },
+                    { icon: Globe, text: '4M+ Monthly Website Views' }
+                  ].map((stat, i) => (
+                    <div key={`m2-${i}`} className="flex items-center gap-2 bg-[#181611]/80 border border-white/5 rounded-full px-3 py-1.5 shrink-0">
+                      <stat.icon size={14} className="text-brand-gold shrink-0" />
+                      <span className="text-[11px] font-semibold text-neutral-300 whitespace-nowrap">{stat.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Fade edges */}
+              <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
+            </div>
+          </div>
+
+          {/* BOTTOM CARDS CONTAINER — No payout toast, tighter padding, real data */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-in-up relative mx-auto w-full max-w-[1300px]" style={{ animationDelay: '0.2s' }}>
+
             {/* Exclusive Offers Card (colspan 8) */}
-            <div className="lg:col-span-8 xl:col-span-8 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-5 md:p-6 relative overflow-hidden group shadow-xl">
+            <div className="lg:col-span-8 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-3 sm:p-4 pb-3 relative overflow-hidden group shadow-xl flex flex-col">
                <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/5 to-transparent pointer-events-none"></div>
                
-               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
-                 <div className="w-full flex-1 flex justify-center items-center">
-                   <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                     Exclusive March Forex Offers <Flame size={18} className="text-[#f93a74] drop-shadow-[0_0_8px_rgba(249,58,116,0.6)]" />
-                   </h3>
-                 </div>
-                 <div className="flex gap-1.5 self-end sm:self-auto shrink-0 absolute right-0">
-                   <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronLeft size={14}/></div>
-                   <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 cursor-pointer transition-colors border border-white/5"><ChevronRight size={14}/></div>
+               <div className="flex items-center justify-between mb-4 relative z-10">
+                 <h3 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+                   Exclusive Offers <Flame size={16} className="text-[#f93a74] drop-shadow-[0_0_8px_rgba(249,58,116,0.6)]" />
+                 </h3>
+                 <div className="flex items-center gap-2 shrink-0">
+                   {totalOffersPages > 1 && (
+                     <span className="text-neutral-500 text-[10px] font-semibold">{offersPage + 1}/{totalOffersPages}</span>
+                   )}
+                   <div className="flex gap-1.5">
+                     <button
+                       onClick={() => setOffersPage(p => Math.max(0, p - 1))}
+                       disabled={offersPage === 0}
+                       className={`w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 border ${
+                         offersPage === 0
+                           ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed'
+                           : 'bg-white/10 text-white/70 border-white/10 hover:bg-white/15 hover:text-white'
+                       }`}
+                     >
+                       <ChevronLeft size={14}/>
+                     </button>
+                     <button
+                       onClick={() => setOffersPage(p => Math.min(totalOffersPages - 1, p + 1))}
+                       disabled={offersPage >= totalOffersPages - 1}
+                       className={`w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 border ${
+                         offersPage >= totalOffersPages - 1
+                           ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed'
+                           : 'bg-white/10 text-white/70 border-white/10 hover:bg-white/15 hover:text-white'
+                       }`}
+                     >
+                       <ChevronRight size={14}/>
+                     </button>
+                   </div>
                  </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 relative z-10">
-                 {[ 
-                   { name: 'Blueberry Funded', discount: '35% OFF', rating: '3.8', icon: 'https://blueberryfunded.com/wp-content/themes/blueberryfunded-xmas/assets/img/logo.svg' },
-                   { name: 'Alpha Capital', discount: '15% OFF', rating: '4.4', icon: 'https://alphacapitalgroup.uk/static/media/companyLogoInitials.879d8bbc8b528b1fd27761f4e43c34a0.svg' },
-                   { name: 'The5ers', discount: '5% OFF', rating: '4.8', icon: 'https://the5ers.com/wp-content/uploads/2021/08/The5ers-Logo.png' },
-                   { name: 'BrightFunded', discount: '15% OFF', rating: '4.5', icon: 'https://app.brightfunded.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo_brightfunded_mark.881aade2.png&w=96&q=75' },
-                   { name: 'FundedNext', discount: '7% OFF', rating: '4.4', icon: 'https://fundednext.com/_next/image?url=https%3A%2F%2Fdirslur24ie1a.cloudfront.net%2Ffundednext%2FFundednext%20logo_White%20(1).png&w=384&q=75' },
-                   { name: 'ThinkCapital', discount: '20% OFF', rating: '4.2', icon: 'https://trader.thinkcapital.com/assets/images/think-capital-logo.svg' }
-                 ].map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-2 pr-2.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
-                     <div className="flex items-center gap-2.5">
-                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 relative shrink-0">
-                          <img src={firm.icon} alt={firm.name} className="w-full h-full object-contain" />
+               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 sm:grid-rows-[repeat(2,1fr)] gap-2.5 relative z-10 flex-1">
+                 {paginatedOffers.map((firm, i) => (
+                   <div key={firm.id || i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 pr-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
+                     <div className="flex items-center gap-2.5 min-w-0">
+                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 shrink-0">
+                          <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" />
                        </div>
                        <div className="text-left min-w-0">
-                         <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate max-w-[100px] xl:max-w-none">{firm.name}</h4>
-                         <div className="flex items-center gap-1.5">
-                           <span className="text-brand-gold text-[11px] font-bold leading-none">{firm.rating}</span>
+                         <h4 className="text-white text-sm font-bold tracking-tight mb-0.5 truncate">{firm.name}</h4>
+                         <div className="flex items-center gap-1">
+                           <span className="text-brand-gold text-[11px] font-bold leading-none">{Number(firm.rating).toFixed(1)}</span>
                            <div className="flex gap-[1px]">
-                             {[1,2,3,4].map(s=><Star key={s} size={8} className="text-brand-gold fill-brand-gold"/>)}
-                             <Star size={8} className="text-neutral-600 fill-neutral-600"/>
+                             {[1,2,3,4,5].map(s=><Star key={s} size={8} className={s <= Math.round(Number(firm.rating)) ? "text-brand-gold fill-brand-gold" : "text-neutral-700 fill-neutral-700"}/>)}
                            </div>
                          </div>
                        </div>
                      </div>
-                     <div className="flex flex-col gap-1.5 shrink-0 pl-1">
-                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2 py-1 rounded-full flex items-center justify-between gap-1.5 bg-white/5 w-[80px] whitespace-nowrap shadow-sm">
-                          <span>{firm.discount}</span>
+                     <div className="flex flex-col gap-1.5 shrink-0 pl-2">
+                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center justify-between gap-1.5 bg-white/5 w-[80px] whitespace-nowrap">
+                          <span>{firm.discountValue ? `${firm.discountValue}% OFF` : 'DEAL'}</span>
                           <Gift size={9} className="text-brand-gold shrink-0"/>
                         </div>
-                        <div className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2 py-[3px] rounded-full flex items-center justify-between gap-1.5 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[80px] whitespace-nowrap">
-                          <span className="tracking-wide">SPOT</span>
+                        <button
+                          onClick={() => handleCopyCode(firm)}
+                          className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2.5 py-1 rounded-full flex items-center justify-between gap-1.5 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[80px] whitespace-nowrap hover:shadow-[0_4px_20px_-2px_rgba(246,174,19,0.6)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+                        >
+                          <span className="tracking-wide">{firm.promoCode || 'SPOT'}</span>
                           <Copy size={9} className="stroke-[2.5] shrink-0"/>
-                        </div>
+                        </button>
                      </div>
                    </div>
                  ))}
@@ -269,47 +353,52 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Popular Prop Firms (colspan 4) */}
-            <div className="lg:col-span-4 xl:col-span-4 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-5 md:p-6 flex flex-col h-full shadow-xl relative overflow-hidden group">
+            <div className="lg:col-span-4 bg-[#110f0a] border border-brand-gold/15 rounded-2xl p-3 sm:p-4 flex flex-col shadow-xl relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-bl from-brand-gold/5 to-transparent pointer-events-none"></div>
-               <div className="flex items-center justify-center mb-6 relative z-10 w-full">
-                 <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                   Most Popular Futures Prop Firms <Trophy size={16} className="text-[#f65c13] drop-shadow-[0_0_8px_rgba(246,92,19,0.6)]" />
+               <div className="flex items-center justify-center mb-4 relative z-10">
+                 <h3 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+                   Top Rated Firms <Trophy size={16} className="text-[#f65c13] drop-shadow-[0_0_8px_rgba(246,92,19,0.6)]" />
                  </h3>
                </div>
                
-               <div className="flex-1 flex flex-col justify-between space-y-3 relative z-10 w-full">
-                 {/* Map dynamic showcase firms! Use length to ensure 3 spots */}
+               <div className="flex-1 flex flex-col gap-2.5 relative z-10">
                  {showcaseFirms.map((firm, i) => (
-                   <div key={i} className="bg-[#0a0908] border border-white/5 rounded-xl p-2 pr-2.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 relative overflow-hidden group w-full">
-                     <div className="flex items-center gap-2.5 shrink">
+                   <div key={firm.id || i} className="bg-[#0a0908] border border-white/5 rounded-xl p-2 pr-2.5 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300 w-full">
+                     <div className="flex items-center gap-2 min-w-0">
                        <div className="w-7 flex items-center justify-center shrink-0">
-                         {i === 0 ? <Trophy size={18} className="text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> :
-                          i === 1 ? <Trophy size={18} className="text-[#cbd5e1] drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]" /> :
-                          i === 2 ? <Trophy size={18} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
+                         {i === 0 ? <Trophy size={16} className="text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> :
+                          i === 1 ? <Trophy size={16} className="text-[#cbd5e1] drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]" /> :
+                          i === 2 ? <Trophy size={16} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
                           <span className="text-neutral-500 font-black text-xs">#{i + 1}</span>}
                        </div>
-                       <div className="w-10 h-10 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
+                       <div className="w-9 h-9 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
                           {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-[10px]">{firm.name.charAt(0)}</span>}
                        </div>
-                       <div className="text-left min-w-0 flex-1">
-                         <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate max-w-[90px] xl:max-w-[105px] pr-1">{firm.name}</h4>
-                         <div className="flex items-center gap-1.5">
-                           <span className="text-brand-gold text-[11px] font-bold leading-none">{firm.rating.toFixed(1)}</span>
+                       <div className="text-left min-w-0">
+                         <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate">{firm.name}</h4>
+                         <div className="flex items-center gap-1">
+                           <span className="text-brand-gold text-[10px] font-bold leading-none">{firm.rating.toFixed(1)}</span>
                            <div className="flex gap-[1px]">
-                             {[1,2,3,4,5].map(s=><Star key={s} size={8} className={s <= Math.floor(firm.rating) ? "text-brand-gold fill-brand-gold" : "text-neutral-700 fill-neutral-700"}/>)}
+                             {[1,2,3,4,5].map(s=><Star key={s} size={7} className={s <= Math.floor(firm.rating) ? "text-brand-gold fill-brand-gold" : "text-neutral-700 fill-neutral-700"}/>)}
                            </div>
                          </div>
                        </div>
                      </div>
-                     <div className="flex flex-col gap-1.5 shrink-0 pl-1">
-                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2 py-1 rounded-full flex items-center justify-between gap-1.5 bg-white/5 w-[80px] whitespace-nowrap shadow-sm">
-                          <span>10% OFF</span>
-                          <Gift size={9} className="text-brand-gold shrink-0"/>
+                     <div className="flex flex-col gap-1 shrink-0 pl-1">
+                        <div className="border border-white/10 text-white/90 text-[9px] font-bold px-2 py-[3px] rounded-full flex items-center justify-between gap-1 bg-white/5 w-[76px] whitespace-nowrap">
+                          <span>DEAL</span>
+                          <Gift size={8} className="text-brand-gold shrink-0"/>
                         </div>
-                        <div className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2 py-[3px] rounded-full flex items-center justify-between gap-1.5 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[80px] whitespace-nowrap">
+                        <button
+                          onClick={() => {
+                            const matchedFirm = topFirms.find(f => f.name === firm.name);
+                            if (matchedFirm) handleCopyCode(matchedFirm);
+                          }}
+                          className="bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-[9px] font-black px-2 py-[3px] rounded-full flex items-center justify-between gap-1 shadow-[0_2px_10px_-2px_rgba(246,174,19,0.4)] w-[76px] whitespace-nowrap hover:shadow-[0_4px_20px_-2px_rgba(246,174,19,0.6)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+                        >
                           <span className="tracking-wide">SPOT</span>
-                          <Copy size={9} className="stroke-[2.5] shrink-0"/>
-                        </div>
+                          <Copy size={8} className="stroke-[2.5] shrink-0"/>
+                        </button>
                      </div>
                    </div>
                  ))}
@@ -318,7 +407,7 @@ const LandingPage: React.FC = () => {
 
           </div>
           
-          <div className="w-full max-w-[1300px] mx-auto flex justify-end mt-4 animate-fade-in-up px-2 sm:px-0" style={{ animationDelay: '0.3s' }}>
+          <div className="w-full max-w-[1300px] mx-auto flex justify-end mt-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
              <Link to="/firms">
                 <button className="text-neutral-400 hover:text-white flex items-center gap-2 text-sm font-semibold transition-colors border border-white/5 bg-white/5 rounded-full px-5 py-2 hover:bg-white/10 hover:border-white/10 shadow-lg">
                    View All Firms <ArrowRight size={14} />
@@ -326,6 +415,70 @@ const LandingPage: React.FC = () => {
              </Link>
           </div>
         </div>
+
+        {/* ── PROMO CODE COPIED POPUP ── */}
+        {copiedFirm && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setCopiedFirm(null)}>
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div
+              className="relative bg-[#111] border border-brand-gold/30 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-[0_20px_80px_-10px_rgba(246,174,19,0.35)] animate-fade-in-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button onClick={() => setCopiedFirm(null)} className="absolute top-4 right-4 text-neutral-500 hover:text-white transition-colors">
+                <X size={18} />
+              </button>
+
+              {/* Success Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-14 h-14 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center">
+                  <CheckCircle2 size={28} className="text-green-400" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-white text-lg font-bold text-center mb-1">Code Copied!</h3>
+              <p className="text-neutral-400 text-sm text-center mb-5">Use this code at checkout for your discount</p>
+
+              {/* Code Display */}
+              <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl px-5 py-3 flex items-center justify-center gap-3 mb-5">
+                <span className="text-brand-gold text-2xl font-black tracking-widest">{copiedFirm.code}</span>
+                <CheckCircle2 size={18} className="text-green-400" />
+              </div>
+
+              {/* Firm Info */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-xl bg-black border border-white/10 flex items-center justify-center p-1.5 shrink-0">
+                  <img src={copiedFirm.logo} alt={copiedFirm.name} className="w-full h-full object-contain" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-white font-bold text-sm truncate">{copiedFirm.name}</h4>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-1">
+                      <span className="text-brand-gold text-xs font-bold">{copiedFirm.rating.toFixed(1)}</span>
+                      <div className="flex gap-[1px]">
+                        {[1,2,3,4,5].map(s => <Star key={s} size={9} className={s <= Math.round(copiedFirm.rating) ? 'text-brand-gold fill-brand-gold' : 'text-neutral-700 fill-neutral-700'} />)}
+                      </div>
+                    </div>
+                    <span className="text-green-400 text-xs font-bold">{copiedFirm.discount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visit Website Button */}
+              {copiedFirm.affiliate && (
+                <a
+                  href={copiedFirm.affiliate}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-gradient-to-r from-brand-gold to-yellow-400 text-black font-black text-sm rounded-full py-3 text-center hover:shadow-[0_6px_30px_-4px_rgba(246,174,19,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                >
+                  Visit {copiedFirm.name} →
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Top Rated Section */}
