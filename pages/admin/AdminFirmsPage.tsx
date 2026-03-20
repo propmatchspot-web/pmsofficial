@@ -352,7 +352,7 @@ const AdminFirmsPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg bg-surface-dark border border-brand-border flex items-center justify-center text-brand-muted overflow-hidden">
-                          {firm.logo_url ? <img src={firm.logo_url} alt={firm.name} className="w-full h-full object-contain p-1" /> : <ImageIcon size={20} />}
+                          {firm.logo_url ? <img src={firm.logo_url} alt={firm.name} className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
                         </div>
                         <div>
                           <div className="font-bold text-white">{firm.name}</div>

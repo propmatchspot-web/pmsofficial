@@ -3,7 +3,7 @@ import { PropFirm } from '../types';
 import { Loader2, Zap, ArrowRight, CheckCircle2, RefreshCcw, Star, BarChart3, DollarSign, ShieldAlert, MonitorSmartphone, Target, TrendingUp, Activity } from 'lucide-react';
 import { determineGroqMatch, QuizPreferences } from '../services/groqService';
 import { supabase } from '../lib/supabaseClient';
-import { mapFirmFromDB } from '../lib/services';
+import { mapFirmFromDB, generateSlug } from '../lib/services';
 import { Link } from 'react-router-dom';
 
 const QUESTIONS = [
@@ -165,7 +165,7 @@ const SpotAIPage: React.FC = () => {
                             </div>
                             <div className="p-8 md:p-10">
                                 <div className="flex items-start md:items-center flex-col md:flex-row gap-6 mb-8 border-b border-white/5 pb-8">
-                                    <img src={result.firm.logo} className="w-20 h-20 rounded-2xl bg-[#161611] border border-white/10 shadow-lg object-contain p-2" alt={result.firm.name} />
+                                    <img src={result.firm.logo} className="w-20 h-20 rounded-2xl shadow-lg object-cover" alt={result.firm.name} />
                                     <div className="flex-1">
                                         <h3 className="text-2xl font-black text-white mb-2">{result.firm.name}</h3>
                                         <div className="flex flex-wrap gap-2">
@@ -203,7 +203,7 @@ const SpotAIPage: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <Link to={`/firm/${result.firm.id}`}>
+                                <Link to={`/firm/${generateSlug(result.firm.name)}`}>
                                     <button className="group w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-gold to-amber-500 text-black font-bold text-lg rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(246,174,19,0.25)] hover:shadow-[0_4px_30px_rgba(246,174,19,0.4)]">
                                         View {result.firm.name} Details <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                                     </button>

@@ -28,20 +28,19 @@ const FirmLogo: React.FC<FirmLogoProps> = ({ src, alt, size = 'md', className = 
         }
     };
 
-    // Define size classes
+    // Define size classes — no padding so logo fills edge-to-edge
     const sizeClasses = {
-        sm: 'w-8 h-8 p-1',       // Tiny (lists)
-        md: 'w-14 h-14 p-2',     // Standard (cards) - Increased from 12 to 14 to match popup feel
-        lg: 'w-20 h-20 p-2',     // Large (headers)
-        xl: 'w-32 h-32 p-4',     // Extra Large (detail page hero)
+        sm: 'w-8 h-8',       // Tiny (lists)
+        md: 'w-14 h-14',     // Standard (cards)
+        lg: 'w-20 h-20',     // Large (headers)
+        xl: 'w-32 h-32',     // Extra Large (detail page hero)
     };
 
     return (
         <div
             className={`
         relative overflow-hidden rounded-xl 
-        flex items-center justify-center shrink-0 
-        bg-black border border-brand-border/30 shadow-inner
+        shrink-0
         ${sizeClasses[size]} 
         ${className}
       `}
@@ -49,7 +48,7 @@ const FirmLogo: React.FC<FirmLogoProps> = ({ src, alt, size = 'md', className = 
             <img
                 src={imgSrc}
                 alt={alt}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
                 loading="lazy"
                 onError={handleError}
             />

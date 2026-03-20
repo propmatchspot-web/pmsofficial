@@ -321,8 +321,8 @@ const LandingPage: React.FC = () => {
                  {paginatedOffers.map((firm, i) => (
                    <div key={firm.id || i} className="bg-[#0a0908] border border-white/5 rounded-xl p-3 pr-3 flex items-center justify-between hover:border-brand-gold/30 hover:bg-[#0f0d0a] transition-all duration-300">
                      <div className="flex items-center gap-2.5 min-w-0">
-                       <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1 shrink-0">
-                          <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" />
+                       <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                          <img src={firm.logo} alt={firm.name} className="w-full h-full object-cover" />
                        </div>
                        <div className="text-left min-w-0">
                          <h4 className="text-white text-sm font-bold tracking-tight mb-0.5 truncate">{firm.name}</h4>
@@ -371,8 +371,8 @@ const LandingPage: React.FC = () => {
                           i === 2 ? <Trophy size={16} className="text-[#b45309] drop-shadow-[0_0_8px_rgba(180,83,9,0.6)]" /> :
                           <span className="text-neutral-500 font-black text-xs">#{i + 1}</span>}
                        </div>
-                       <div className="w-9 h-9 shrink-0 rounded-lg bg-black flex items-center justify-center border border-white/10 p-1">
-                          {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-contain" /> : <span className="text-white font-bold text-[10px]">{firm.name.charAt(0)}</span>}
+                       <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden flex items-center justify-center">
+                          {firm.logo ? <img src={firm.logo} alt={firm.name} className="w-full h-full object-cover" /> : <span className="text-white font-bold text-[10px]">{firm.name.charAt(0)}</span>}
                        </div>
                        <div className="text-left min-w-0">
                          <h4 className="text-white text-xs font-bold tracking-tight mb-0.5 truncate">{firm.name}</h4>
@@ -448,8 +448,8 @@ const LandingPage: React.FC = () => {
 
               {/* Firm Info */}
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 rounded-xl bg-black border border-white/10 flex items-center justify-center p-1.5 shrink-0">
-                  <img src={copiedFirm.logo} alt={copiedFirm.name} className="w-full h-full object-contain" />
+                <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                  <img src={copiedFirm.logo} alt={copiedFirm.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="text-white font-bold text-sm truncate">{copiedFirm.name}</h4>

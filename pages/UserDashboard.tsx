@@ -224,7 +224,7 @@ const FavoritesTab = ({ user }: { user: any }) => {
           {favorites.map((fav) => (
             <div key={fav.id} className="bg-brand-surface border border-brand-border rounded-xl p-5 hover:border-brand-gold/50 transition-all group">
               <div className="flex items-start justify-between mb-4">
-                <img src={fav.firm.logo_url} alt={fav.firm.name} className="h-10 w-10 rounded object-contain bg-white/5 p-1" />
+                <img src={fav.firm.logo_url} alt={fav.firm.name} className="h-10 w-10 rounded-lg object-cover" />
                 <Button size="xs" variant="secondary" className="text-red-500 hover:text-red-400">
                   <Heart size={14} className="fill-current" />
                 </Button>

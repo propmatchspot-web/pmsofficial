@@ -26,6 +26,21 @@ const inferChallengeType = (name: string, dbType?: string): '1-Step' | '2-Step' 
     return '2-Step'; // Default fallback
 };
 
+export const generateSlug = (name: string): string => {
+    if (!name) return '';
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove all non-word characters (excluding spaces and hyphens)
+        .trim()
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+};
+
+const isUUID = (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+};
+
 // Helper to map DB columns to UI PropFirm type
 export const mapFirmFromDB = (dbFirm: any): PropFirm => {
     const challenges = dbFirm.challenges?.map(mapChallengeFromDB) || [];
@@ -125,11 +140,31 @@ export const FirmService = {
     },
 
     // Fetch single firm with full details + challenges
-    async getFirmDetails(id: string): Promise<PropFirm | null> {
+    async getFirmDetails(idOrSlug: string): Promise<PropFirm | null> {
+        let actualId = idOrSlug;
+
+        // If it's a slug, we need to find the matching firm ID first
+        if (!isUUID(idOrSlug)) {
+            const { data: firms, error: fetchError } = await supabase
+                .from('firms')
+                .select('id, name')
+                .eq('status', 'active');
+                
+            if (fetchError || !firms) {
+                console.error('Error fetching firms for slug resolution:', fetchError);
+                return null;
+            }
+            
+            const matchedFirm = firms.find(f => generateSlug(f.name) === idOrSlug);
+            if (!matchedFirm) return null;
+            
+            actualId = matchedFirm.id;
+        }
+
         const { data: firm, error: firmError } = await supabase
             .from('firms')
             .select('*')
-            .eq('id', id)
+            .eq('id', actualId)
             .single();
 
         if (firmError || !firm) {
@@ -140,7 +175,7 @@ export const FirmService = {
         const { data: challenges, error: challengeError } = await supabase
             .from('challenges')
             .select('*')
-            .eq('firm_id', id)
+            .eq('firm_id', actualId)
             .order('created_at', { ascending: true }); // Maybe order by price later?
 
         if (challengeError) {

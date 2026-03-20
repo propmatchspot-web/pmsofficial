@@ -5,6 +5,7 @@ import { useComparison } from '../context/ComparisonContext';
 import FirmLogo from './FirmLogo';
 import PlatformLogo from './PlatformLogo';
 import { ArrowUpRight, GitCompareArrows } from 'lucide-react';
+import { generateSlug } from '../lib/services';
 
 interface FirmCardProps {
   firm: PropFirm;
@@ -46,15 +47,13 @@ const FirmCard: React.FC<FirmCardProps> = ({ firm, className }) => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3.5">
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:border-brand-gold/30 transition-colors">
                   <FirmLogo
                     src={iconUrl}
                     fallbackSrc={firm.logo}
                     alt={firm.name}
                     size="md"
-                    className="rounded-lg"
+                    className="rounded-xl border border-white/10 group-hover:border-brand-gold/30 transition-colors w-12 h-12"
                   />
-                </div>
               </div>
               <div>
                 <h3 className="font-bold text-[15px] leading-tight text-white group-hover:text-brand-gold transition-colors duration-300">{firm.name}</h3>
@@ -126,7 +125,7 @@ const FirmCard: React.FC<FirmCardProps> = ({ firm, className }) => {
 
         {/* Action Footer */}
         <div className="px-4 py-3.5 border-t border-white/[0.05] flex items-center gap-2.5 mt-auto">
-          <Link to={`/firm/${firm.id}`} className="flex-1">
+          <Link to={`/firm/${generateSlug(firm.name)}`} className="flex-1">
             <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-gold to-amber-500 hover:from-amber-500 hover:to-brand-gold text-black font-bold text-sm py-2.5 rounded-xl transition-all duration-300 shadow-[0_4px_15px_rgba(246,174,19,0.2)] hover:shadow-[0_4px_20px_rgba(246,174,19,0.35)]">
               View Firm
               <ArrowUpRight size={15} strokeWidth={2.5} />

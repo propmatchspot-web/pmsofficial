@@ -83,24 +83,29 @@ const FirmDetailPage: React.FC = () => {
       }
     };
 
+    fetchFirmDetails();
+  }, [id]);
+
+  useEffect(() => {
+    if (!firm?.id) return;
+
     const checkSavedStatus = async () => {
-      if (!user || !id) return;
+      if (!user) return;
       const { data } = await supabase
         .from('saved_firms')
         .select('*')
         .eq('user_id', user.id)
-        .eq('firm_id', id)
+        .eq('firm_id', firm.id)
         .single();
       setIsSaved(!!data);
     };
 
     const fetchReviews = async () => {
-      if (!id) return;
       setReviewLoading(true);
       const { data } = await supabase
         .from('reviews')
         .select('*, profiles(full_name)')
-        .eq('firm_id', id)
+        .eq('firm_id', firm.id)
         .order('created_at', { ascending: false });
 
       if (data) setReviews(data);
@@ -108,12 +113,11 @@ const FirmDetailPage: React.FC = () => {
     };
 
     const fetchSimilarFirms = async () => {
-      if (!id) return;
       try {
         const { data, error } = await supabase
           .from('firms')
           .select('*')
-          .neq('id', id)
+          .neq('id', firm.id)
           .limit(3);
 
         if (data && !error) {
@@ -129,6 +133,8 @@ const FirmDetailPage: React.FC = () => {
             drawdown: f.drawdown || '10%',
             tags: f.tags || [],
             challenges: [],
+            description: f.description || '',
+            platforms: f.platforms || [],
           }));
           setSimilarFirms(mapped);
         }
@@ -137,11 +143,10 @@ const FirmDetailPage: React.FC = () => {
       }
     };
 
-    fetchFirmDetails();
     checkSavedStatus();
     fetchReviews();
     fetchSimilarFirms();
-  }, [id, user]);
+  }, [firm?.id, user]);
 
   const toggleSave = async () => {
     if (!user) {
@@ -154,10 +159,10 @@ const FirmDetailPage: React.FC = () => {
     }
 
     if (isSaved) {
-      await supabase.from('saved_firms').delete().match({ user_id: user.id, firm_id: id });
+      await supabase.from('saved_firms').delete().match({ user_id: user.id, firm_id: firm?.id });
       setIsSaved(false);
     } else {
-      await supabase.from('saved_firms').insert({ user_id: user.id, firm_id: id });
+      await supabase.from('saved_firms').insert({ user_id: user.id, firm_id: firm?.id });
       setIsSaved(true);
     }
   };
@@ -168,7 +173,7 @@ const FirmDetailPage: React.FC = () => {
 
     const { error } = await supabase.from('reviews').insert({
       user_id: user.id,
-      firm_id: id,
+      firm_id: firm?.id,
       rating: newReview.rating,
       comment: newReview.comment,
       status: 'pending' // Auto-approve or pending based on policy
@@ -191,7 +196,7 @@ const FirmDetailPage: React.FC = () => {
       setNewReview({ rating: 5, comment: '' });
       setShowReviewForm(false);
       // Refresh reviews
-      const { data } = await supabase.from('reviews').select('*, profiles(full_name)').eq('firm_id', id).order('created_at', { ascending: false });
+      const { data } = await supabase.from('reviews').select('*, profiles(full_name)').eq('firm_id', firm?.id).order('created_at', { ascending: false });
       if (data) setReviews(data);
     }
   };
@@ -265,7 +270,7 @@ const FirmDetailPage: React.FC = () => {
             <div className="hidden md:flex md:flex-row md:justify-between md:items-start gap-6 relative z-10">
               <div className="flex gap-6">
                 {/* Logo */}
-                <FirmLogo src={firm.logo} alt={firm.name} size="xl" className="border border-brand-border bg-brand-black" />
+                <FirmLogo src={firm.logo} alt={firm.name} size="xl" className="shadow-2xl" />
 
                 {/* Title & Badges */}
                 <div className="flex flex-col gap-2">
@@ -357,7 +362,7 @@ const FirmDetailPage: React.FC = () => {
             {/* MOBILE LAYOUT (below md): Centered stacked layout */}
             <div className="flex md:hidden flex-col items-center gap-4 relative z-10">
               {/* Logo - Centered */}
-              <FirmLogo src={firm.logo} alt={firm.name} size="xl" className="border border-brand-border bg-brand-black" />
+              <FirmLogo src={firm.logo} alt={firm.name} size="xl" className="shadow-2xl" />
 
               {/* Title & Verified Badge */}
               <div className="flex flex-col items-center gap-2 text-center">
