@@ -15,7 +15,8 @@ import {
     CreditCard,
     Shield,
     Trophy,
-    Send
+    Send,
+    BookOpen
 } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
@@ -34,6 +35,7 @@ const AdminLayout: React.FC = () => {
                 { icon: Shield, label: 'Trust Badges', path: '/admin/badges' }, // Placeholder route
                 { icon: Trophy, label: 'Competitions', path: '/admin/competitions' },
                 { icon: Send, label: 'Marketing', path: '/admin/marketing' },
+                { icon: BookOpen, label: 'Blog', path: '/admin/blog' },
                 { icon: Tag, label: 'Offers', path: '/admin/offers' }, // Added to keep existing functionality
             ]
         },
