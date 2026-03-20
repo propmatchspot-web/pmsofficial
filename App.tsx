@@ -7,6 +7,8 @@ import BrowseFirmsPage from './pages/BrowseFirmsPage';
 import FirmDetailPage from './pages/FirmDetailPage';
 import FirmReviewsPage from './pages/FirmReviewsPage';
 import AllReviewsPage from './pages/AllReviewsPage';
+import BlogListPage from './pages/BlogListPage';
+import BlogPostPage from './pages/BlogPostPage';
 import ComparePage from './pages/ComparePage';
 import OffersPage from './pages/OffersPage';
 import UserDashboard from './pages/UserDashboard';
@@ -27,6 +29,7 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminPayoutsPage from './pages/admin/AdminPayoutsPage';
 import AdminBadgesPage from './pages/admin/AdminBadgesPage';
 import AdminOffersPage from './pages/admin/AdminOffersPage';
+import AdminBlogPage from './pages/admin/AdminBlogPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminRewardsPage from './pages/admin/AdminRewardsPage';
 import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage';
@@ -94,6 +97,8 @@ const MainLayout = () => {
           <Route path="/firm/:id" element={<FirmDetailPage />} />
           <Route path="/firm/:id/reviews" element={<FirmReviewsPage />} />
           <Route path="/reviews" element={<AllReviewsPage />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/competitions" element={<CompetitionsPage />} />
           <Route path="/competition/:id" element={<CompetitionDetailPage />} />
@@ -128,6 +133,7 @@ const MainLayout = () => {
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="rewards" element={<AdminRewardsPage />} />
             <Route path="marketing" element={<AdminMarketingPage />} />
+            <Route path="blog" element={<AdminBlogPage />} />
             <Route path="competitions" element={<AdminCompetitionsPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
