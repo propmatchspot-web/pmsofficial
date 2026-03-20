@@ -5,6 +5,8 @@ import LandingPage from './pages/LandingPage';
 import Footer from './components/Footer';
 import BrowseFirmsPage from './pages/BrowseFirmsPage';
 import FirmDetailPage from './pages/FirmDetailPage';
+import FirmReviewsPage from './pages/FirmReviewsPage';
+import AllReviewsPage from './pages/AllReviewsPage';
 import ComparePage from './pages/ComparePage';
 import OffersPage from './pages/OffersPage';
 import UserDashboard from './pages/UserDashboard';
@@ -90,6 +92,8 @@ const MainLayout = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/firms" element={<BrowseFirmsPage />} />
           <Route path="/firm/:id" element={<FirmDetailPage />} />
+          <Route path="/firm/:id/reviews" element={<FirmReviewsPage />} />
+          <Route path="/reviews" element={<AllReviewsPage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/competitions" element={<CompetitionsPage />} />
           <Route path="/competition/:id" element={<CompetitionDetailPage />} />

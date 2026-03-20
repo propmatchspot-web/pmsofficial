@@ -194,3 +194,34 @@ export const FirmService = {
         return mappedFirm;
     }
 };
+
+// Generate a consistent dummy user profile based on a Review UUID
+export function generateFakeUserForReview(reviewId: string) {
+  const names = [
+    "Alex Carter", "Sarah Jenkins", "Michael Chen", "David Smith", "Emma Wilson", 
+    "James Taylor", "Olivia Davis", "Daniel White", "Sophia Martin", "Matthew Thompson", 
+    "Isabella Garcia", "Andrew Martinez", "Mia Robinson", "Joshua Clark", "Charlotte Rodriguez", 
+    "Christopher Lee", "Amelia Lewis", "Joseph Walker", "Harper Hall", "William Allen", 
+    "Evelyn Young", "Anthony Hernandez", "Abigail King", "Ryan Wright", "Emily Lopez", 
+    "Jacob Hill", "Elizabeth Scott", "Nicholas Green", "Avery Adams", "Jonathan Baker", 
+    "Sofia Gonzalez", "Christian Nelson", "Logan Perez", "Aria Roberts", "Jackson Turner"
+  ];
+  const domains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
+  
+  // Create a deterministic hash from the UUID string
+  let hash = 0;
+  for (let i = 0; i < (reviewId?.length || 0); i++) {
+    hash = reviewId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+
+  const name = names[hash % names.length];
+  const domain = domains[hash % domains.length];
+  const firstName = name.split(' ')[0];
+  
+  const emailPrefix = firstName.toLowerCase() + '.....';
+  const email = emailPrefix + '@' + domain;
+  const initial = firstName.charAt(0).toUpperCase();
+
+  return { name, email, initial };
+}

@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
     { name: 'Browse Firms', path: '/firms' },
     { name: 'Competitions', path: '/competitions' },
     { name: 'Offers', path: '/offers' },
-    { name: 'Compare', path: '/compare' },
+    { name: 'Reviews', path: '/reviews' },
     { name: '⚡ Spot AI', path: '/spot-ai' },
     { name: '🔁 Spot Replay', path: '/spot-replay' },
   ];

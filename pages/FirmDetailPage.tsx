@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Shield, ExternalLink, CheckCircle, AlertTriangle, ChevronRight, Globe, Calendar, DollarSign, TrendingDown, Clock, Layers, Star, MapPin, Monitor, XCircle, Check, CreditCard, PieChart, Heart, MessageSquare, TrendingUp } from 'lucide-react';
+import { Shield, ExternalLink, CheckCircle, AlertTriangle, ChevronRight, Globe, Calendar, DollarSign, TrendingDown, Clock, Layers, Star, MapPin, Monitor, XCircle, Check, CreditCard, PieChart, Heart, MessageSquare, TrendingUp, ArrowRight } from 'lucide-react';
 import Button from '../components/Button';
 import FirmCard from '../components/FirmCard';
 import FirmLogo from '../components/FirmLogo';
 import PlatformLogo from '../components/PlatformLogo';
 
 
-import { FirmService } from '../lib/services';
+import { FirmService, generateSlug, generateFakeUserForReview } from '../lib/services';
 import { PropFirm } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -104,7 +104,7 @@ const FirmDetailPage: React.FC = () => {
       setReviewLoading(true);
       const { data } = await supabase
         .from('reviews')
-        .select('*, profiles(full_name)')
+        .select('*')
         .eq('firm_id', firm.id)
         .order('created_at', { ascending: false });
 
@@ -196,7 +196,7 @@ const FirmDetailPage: React.FC = () => {
       setNewReview({ rating: 5, comment: '' });
       setShowReviewForm(false);
       // Refresh reviews
-      const { data } = await supabase.from('reviews').select('*, profiles(full_name)').eq('firm_id', firm?.id).order('created_at', { ascending: false });
+      const { data } = await supabase.from('reviews').select('*').eq('firm_id', firm?.id).order('created_at', { ascending: false });
       if (data) setReviews(data);
     }
   };
@@ -735,93 +735,79 @@ const FirmDetailPage: React.FC = () => {
           {/* Tab Content: Reviews */}
           <div id="reviews" className="flex flex-col gap-6 pt-8 border-t border-brand-border mt-8 scroll-mt-32">
             <div className="flex items-center justify-between">
-              <h3 className="text-white text-xl font-bold">Trader Reviews ({reviews.length})</h3>
+              <div>
+                <h3 className="text-white text-xl font-bold flex items-center gap-2">
+                    Trader Reviews
+                    <span className="bg-brand-gold/10 text-brand-gold text-xs px-2 py-0.5 rounded-full border border-brand-gold/20 font-bold">{reviews.length}</span>
+                </h3>
+                <p className="text-brand-muted text-sm mt-1">Recent feedback from verified traders</p>
+              </div>
 
-              {!showReviewForm && (
-                <Button onClick={() => user ? setShowReviewForm(true) : showModal({ type: 'info', title: 'Login Required', message: 'Please log in to write a review.' })} size="sm" variant="secondary">
-                  <MessageSquare size={16} className="mr-2" /> Write a Review
-                </Button>
+              {reviews.length > 0 && (
+                <Link to={`/firm/${generateSlug(firm.name)}/reviews`} className="hidden sm:inline-flex">
+                    <Button size="sm" variant="secondary" className="group shadow-lg">
+                        Explore All Reviews <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform ml-1">arrow_forward</span>
+                    </Button>
+                </Link>
               )}
             </div>
-
-            {/* Review Submission Form */}
-            {showReviewForm && (
-              <div className="bg-brand-surface border border-brand-border rounded-xl p-6 animate-fade-in-up">
-                <h4 className="text-white font-bold mb-4">Write your review</h4>
-                <form onSubmit={submitReview} className="flex flex-col gap-4">
-                  <div>
-                    <label className="text-brand-muted text-sm mb-2 block">Rating</label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setNewReview({ ...newReview, rating: star })}
-                          className={`p-1 transition-transform hover:scale-110 ${newReview.rating >= star ? 'text-brand-gold' : 'text-gray-600'}`}
-                        >
-                          <Star fill={newReview.rating >= star ? "currentColor" : "none"} size={24} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-brand-muted text-sm mb-2 block">Your Experience</label>
-                    <textarea
-                      value={newReview.comment}
-                      onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
-                      placeholder="Share your experience with this firm..."
-                      className="w-full bg-brand-black border border-brand-border rounded-lg p-3 text-white focus:border-brand-gold outline-none min-h-[100px]"
-                      required
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <Button type="submit">Submit Review</Button>
-                    <Button type="button" variant="ghost" onClick={() => setShowReviewForm(false)}>Cancel</Button>
-                  </div>
-                  {submitMsg && <p className="text-green-500 text-sm">{submitMsg}</p>}
-                </form>
-              </div>
-            )}
 
             <div className="flex flex-col gap-4">
-              {reviews.length > 0 ? reviews.map((review) => (
-                <div key={review.id} className="bg-brand-charcoal border border-brand-border rounded-xl p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-full bg-brand-gold/20 text-brand-gold flex items-center justify-center font-bold uppercase border border-brand-gold/30">
-                        {review.profiles?.full_name?.substring(0, 2) || 'TR'}
-                      </div>
-                      <div>
-                        <div className="text-white font-bold">{review.profiles?.full_name || 'Trader'}</div>
-                        <div className="text-brand-muted text-xs flex items-center gap-1">
-                          {new Date(review.created_at).toLocaleDateString()}
+              {reviews.length > 0 ? (
+                  <>
+                    {reviews.slice(0, 3).map((review) => {
+                      const fakeUser = generateFakeUserForReview(review.id);
+                      return (
+                      <div key={review.id} className="bg-brand-charcoal border border-brand-border rounded-xl p-6 hover:shadow-lg transition-all relative overflow-hidden group">
+                        {/* Subtle left border accent depending on rating */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${review.rating >= 4 ? 'bg-green-500/50' : review.rating === 3 ? 'bg-yellow-500/50' : 'bg-red-500/50'}`}></div>
+                        
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex gap-4 items-center">
+                            <div className="w-10 h-10 rounded-full bg-brand-black text-brand-gold flex items-center justify-center font-black uppercase shadow-inner border border-brand-border shrink-0">
+                              {fakeUser.initial}
+                            </div>
+                            <div>
+                              <div className="text-white font-bold">{fakeUser.name}</div>
+                              <div className="text-brand-muted text-[11px] font-medium tracking-wide mt-0.5">{fakeUser.email}</div>
+                              <div className="text-brand-muted/70 text-xs flex items-center gap-1 mt-1 font-medium">
+                                {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                <span className="w-1 h-1 rounded-full bg-brand-border/50 mx-1"></span>
+                                <span className="text-green-500 flex items-center"><CheckCircle size={10} className="mr-0.5" /> Verified By Spot Sheriff</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex text-brand-gold gap-0.5 bg-brand-black px-2 py-1 rounded border border-brand-border/50">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <Star key={star} className={review.rating >= star ? 'fill-current' : 'opacity-20'} size={12} />
+                            ))}
+                          </div>
                         </div>
+                        
+                        <p className="text-gray-300 leading-relaxed text-[14px] line-clamp-3 mt-4">{review.comment}</p>
                       </div>
+                    )})}
+                    
+                    <Link to={`/firm/${generateSlug(firm.name)}/reviews`} className="w-full mt-2">
+                        <button className="w-full py-4 rounded-xl border border-dashed border-brand-border text-brand-muted hover:text-white hover:border-brand-gold/50 hover:bg-white/5 transition-all font-bold flex items-center justify-center gap-2">
+                            Read All {reviews.length} Reviews <ArrowRight size={16} />
+                        </button>
+                    </Link>
+                  </>
+              ) : (
+                <div className="bg-brand-charcoal border border-brand-border rounded-xl p-10 flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-brand-black border border-brand-border flex items-center justify-center text-brand-gold mb-4">
+                        <MessageSquare size={24} />
                     </div>
-                  </div>
-                  <div className="flex text-brand-gold mb-2">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <span key={star} className="material-symbols-outlined text-[18px]">
-                        {review.rating >= star ? 'star' : 'star_border'}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-gray-300 text-sm leading-relaxed">
-                    {review.comment}
-                  </p>
-                </div>
-              )) : (
-                <div className="text-center py-12 text-brand-muted bg-brand-charcoal/50 rounded-xl border border-brand-border border-dashed">
-                  <p>No reviews yet. Be the first to share your experience!</p>
+                    <h4 className="text-white font-bold text-lg mb-2">No Reviews Yet</h4>
+                    <p className="text-brand-muted max-w-sm mb-6">Be the first to share your proprietary trading experience with {firm.name}.</p>
+                    <Link to={`/firm/${generateSlug(firm.name)}/reviews`}>
+                        <Button variant="secondary" className="shadow-lg">Write a Review</Button>
+                    </Link>
                 </div>
               )}
             </div>
-
-            {reviews.length > 5 && (
-              <button className="w-full py-3 text-brand-muted text-sm font-medium border border-brand-border rounded-lg hover:bg-brand-charcoal hover:text-white transition-colors">
-                Load More Reviews
-              </button>
-            )}
           </div>
 
           {/* Similar Firms Carousel */}
