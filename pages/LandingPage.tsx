@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Shield, Award, ChevronRight, ChevronLeft, Users, Zap, CheckCircle2, ArrowRight, LineChart, Bookmark, Star, Cpu, Terminal, ChevronDown, HelpCircle, Sparkles, ShieldCheck, BarChart3, GraduationCap, X, Globe, Flame, Trophy, Gift, Copy } from 'lucide-react';
+import { formatFunding } from '../lib/format';
 import FirmCard from '../components/FirmCard';
 import { supabase } from '../lib/supabaseClient';
 import { PropFirm } from '../types';
@@ -66,7 +67,7 @@ const LandingPage: React.FC = () => {
         name: firm.name,
         rating: firm.rating,
         profit: firm.profitSplit || '80%',
-        maxFunding: firm.maxFunding ? `$${firm.maxFunding / 1000}K` : '$100K',
+        maxFunding: formatFunding(firm.maxFunding),
         drawdown: firm.drawdown || '8%',
         logo: firm.logo,
         tag: firm.show_in_hero ? 'Featured' : i === 0 ? 'Top Choice' : i === 1 ? 'Highly Rated' : 'Popular',

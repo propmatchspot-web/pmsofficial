@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { PropFirm } from '../types';
 import { useComparison } from '../context/ComparisonContext';
+import { formatFunding } from '../lib/format';
 import FirmLogo from './FirmLogo';
 import PlatformLogo from './PlatformLogo';
 import { ArrowUpRight, GitCompareArrows } from 'lucide-react';
@@ -88,7 +89,7 @@ const FirmCard: React.FC<FirmCardProps> = ({ firm, className }) => {
         <div className="px-5 pb-4">
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: 'Max Fund', value: `$${firm.maxFunding ? Math.round(firm.maxFunding / 1000) : 0}k`, color: 'text-white' },
+              { label: 'Max Fund', value: formatFunding(firm.maxFunding), color: 'text-white' },
               { label: 'Profit Split', value: `${firm.profitSplit ? firm.profitSplit.replace('%', '') : '80'}%`, color: 'text-brand-gold' },
               { label: 'Drawdown', value: firm.drawdown || '10%', color: 'text-white' },
             ].map((stat, i) => (
