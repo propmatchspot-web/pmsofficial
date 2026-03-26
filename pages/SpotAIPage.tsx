@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PropFirm } from '../types';
+import { formatFunding } from '../lib/format';
 import { Loader2, Zap, ArrowRight, CheckCircle2, RefreshCcw, Star, BarChart3, DollarSign, ShieldAlert, MonitorSmartphone, Target, TrendingUp, Activity } from 'lucide-react';
 import { determineGroqMatch, QuizPreferences } from '../services/groqService';
 import { supabase } from '../lib/supabaseClient';
@@ -194,7 +195,7 @@ const SpotAIPage: React.FC = () => {
                                     {[
                                         { label: 'Profit Split', val: result.firm.profitSplit },
                                         { label: 'Max Drawdown', val: result.firm.drawdown },
-                                        { label: 'Max Funding', val: `$${(result.firm.maxFunding / 1000).toFixed(0)}K` },
+                                        { label: 'Max Funding', val: formatFunding(result.firm.maxFunding) },
                                         { label: 'Platforms', val: result.firm.platforms.slice(0, 2).join(', ') },
                                     ].map((s, i) => (
                                         <div key={i} className="p-4 bg-white/[0.02] rounded-xl border border-white/5">

@@ -4,6 +4,7 @@ import { FirmService } from '../lib/services';
 import { PropFirm } from '../types';
 import FirmLogo from '../components/FirmLogo';
 import { useComparison } from '../context/ComparisonContext';
+import { formatFunding } from '../lib/format';
 
 const ComparePage: React.FC = () => {
   const { selectedFirms, removeFirm, toggleFirm } = useComparison();
@@ -182,7 +183,7 @@ const ComparePage: React.FC = () => {
                     {[0, 1, 2].map(i => (
                       <td key={i} className="px-4 py-4 text-sm border-r last:border-r-0 border-brand-border text-center">
                         {slots[i] ? (
-                          <span className="font-medium text-white text-base">${(slots[i]?.maxFunding || 0).toLocaleString()}</span>
+                          <span className="font-medium text-white text-base">{formatFunding(slots[i]?.maxFunding)}</span>
                         ) : <span className="text-brand-muted/30">--</span>}
                       </td>
                     ))}

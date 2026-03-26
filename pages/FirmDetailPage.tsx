@@ -9,6 +9,7 @@ import PlatformLogo from '../components/PlatformLogo';
 
 import { FirmService, generateSlug, generateFakeUserForReview } from '../lib/services';
 import { PropFirm } from '../types';
+import { formatFunding } from '../lib/format';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { useModal } from '../context/ModalContext';
@@ -500,7 +501,7 @@ const FirmDetailPage: React.FC = () => {
                   <div className="bg-brand-charcoal border border-brand-border p-4 rounded-lg flex flex-col gap-2">
                     <div className="text-brand-muted text-xs uppercase font-bold tracking-wider">Max Capital</div>
                     <div className="text-white font-semibold text-lg flex items-center gap-2">
-                      <span className="material-symbols-outlined text-brand-gold text-[20px]">payments</span> ${(firm.maxFunding / 1000)}k
+                      <span className="material-symbols-outlined text-brand-gold text-[20px]">payments</span> {formatFunding(firm.maxFunding)}
                     </div>
                   </div>
                   <div className="bg-brand-charcoal border border-brand-border p-4 rounded-lg flex flex-col gap-2">
